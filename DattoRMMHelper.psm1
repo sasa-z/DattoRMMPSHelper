@@ -317,10 +317,10 @@ function send-CustomToastNofication {
         $Folder = get-item "$FolderForToastNotifications" -Force
         $Folder.Attributes = "Hidden"
     }
-a
+
     #create CSV file if it doesn't exist
     "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-    $WorkingCSVFile = Import-Csv "$toastNotificationsTableCSV"
+    $WorkingCSVFile = Import-Csv "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" 
     $WorkingCSVFile.ToastHeader = $Header
     $WorkingCSVFile.ToastIdentifierName = $scriptname
     $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
@@ -348,12 +348,7 @@ a
     $WorkingCSVFile | ForEach-Object {$_.DattoRMMValue = $DattoRMMToastValue}
     $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
     
-    #add initial value for ToastNotification UniqueIdentifier identifier
-    $WorkingCSVFile | ForEach-Object {$_.UniqueIdentifier = "$($scriptname)---0"}
-    $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-
-
-    #add text for ToastNotifications in CSV
+     #add text for ToastNotifications in CSV
     $WorkingCSVFile | ForEach-Object {$_.ToastText = $text}
     $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
 
