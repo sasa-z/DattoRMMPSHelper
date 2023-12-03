@@ -253,7 +253,7 @@ try{
 
 
 }catch{
-    send-Log -scriptname $scriptName -rootScriptFolder $root -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message)" -type Error -addDashes Below -scriptname $scriptname
+    send-Log -scriptname $scriptName -rootScriptFolder $root -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message)" -type Error -addDashes Below 
 
     exit 1
 }
