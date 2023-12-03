@@ -165,7 +165,6 @@ param(
     [string]$FolderForToastNotifications = $FolderForToastNotifications,
     [Parameter(Mandatory=$true)]
     [string]$ToastNotificationAppLogo,
-    [Parameter(Mandatory=$true)]
     [hashtable]$EnvDattoVariablesValuesHashTable = $EnvDattoVariablesValuesHashTable
 )
 
@@ -228,8 +227,9 @@ try{
         copy-item Error.png -Destination "$($FolderForToastNotifications)\Error.png" -Force -ErrorAction SilentlyContinue
         copy-item Success.png -Destination "$($FolderForToastNotifications)\Success.png" -Force -ErrorAction SilentlyContinue
         
-    
+    if ($ToastNotificationAppLogo){
         copy-item $ToastNotificationAppLogo -Destination "$($FolderForToastNotifications)\$($ToastNotificationAppLogo)" -Force -ErrorAction SilentlyContinue
+    }
         copy-item Chocolatey.png -Destination "$($FolderForToastNotifications)\Chocolatey.png" -Force -ErrorAction SilentlyContinue
     }catch{
         send-Log -scriptname $scriptName -rootScriptFolder $root  -logText "Failed to copy Toast Notification logos :  $($_.exception.message)" -type Warning -scriptname $scriptname
