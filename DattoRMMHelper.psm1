@@ -231,24 +231,24 @@ try{
     }
         copy-item Chocolatey.png -Destination "$($FolderForToastNotifications)\Chocolatey.png" -Force -ErrorAction SilentlyContinue
     }catch{
-        send-Log -scriptname $scriptName -rootScriptFolder $root  -logText "Failed to copy Toast Notification logos :  $($_.exception.message)" -type Warning -scriptname $scriptname
+        send-Log -scriptname $scriptName -rootScriptFolder $root  -logText "Failed to copy Toast Notification logos :  $($_.exception.message)" -type Warning 
     }
     
    
     #add variable values into log file
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script name: $($ScriptName) " -scriptname $scriptname 
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" -scriptname $scriptname 
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script variables values: " -scriptname $scriptname 
-    send-log -scriptname $scriptName -rootScriptFolder $root "----------------------------------------------------------------------" -scriptname $scriptname
+    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script name: $($ScriptName) " 
+    send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" 
+    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script variables values: "
+    send-log -scriptname $scriptName -rootScriptFolder $root "----------------------------------------------------------------------"
 
     if ($EnvDattoVariablesValuesHashTable){
         foreach ($dattoVar in $EnvDattoVariablesValuesHashTable.GetEnumerator()){
-            send-log -scriptname $scriptName -rootScriptFolder $root -logText "$($dattoVar.Value) : $($dattoVar.name)" -scriptname $scriptname -skipWriteHost
+            send-log -scriptname $scriptName -rootScriptFolder $root -logText "$($dattoVar.Value) : $($dattoVar.name)" -skipWriteHost
         }
     }
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" -scriptname $scriptname
+    send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" 
 
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Successfully created script working folder $ScriptFolderLocation" -scriptname $scriptname
+    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Successfully created script working folder $ScriptFolderLocation" 
    
 
 
