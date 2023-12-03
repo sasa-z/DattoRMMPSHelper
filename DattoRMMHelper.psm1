@@ -11,6 +11,7 @@ $FolderForToastNotifications = "c:\yw-data\Toast_Notification_Files"
 # $EnvDattoVariablesValuesHashTable.Add("$($env:SendFinalResultToTeams)", "Send final script result to Teams channel?") #change this according to Datto variables
 
 # $dattoEnvironmentVaribleValue = $env:ToastNotifications #pull from Datto
+$dattoEnvironmentVaribleValue = "all" 
 
 
 
