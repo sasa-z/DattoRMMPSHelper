@@ -309,7 +309,7 @@ function send-CustomToastNofication {
     )
 
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
-
+    $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
     #region toast notification items
 
     if (-not (Test-Path -Path $FolderForToastNotifications)){
@@ -320,16 +320,16 @@ function send-CustomToastNofication {
 
     #create CSV file if it doesn't exist
     "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-    $WorkingCSVFile = Import-Csv "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" 
+    $WorkingCSVFile = Import-Csv $CSVTAblePath
     $WorkingCSVFile.ToastHeader = $Header
     $WorkingCSVFile.ToastIdentifierName = $scriptname
     $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
     $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
     $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
-    $WorkingCSVFile | export-csv -path "$toastNotificationsTableCSV" -NoTypeInformation -ErrorAction Stop
+    $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
 
-    $WorkingCSVFile = Import-Csv "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" 
+    $WorkingCSVFile = Import-Csv $CSVTAblePath 
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 
@@ -337,45 +337,45 @@ function send-CustomToastNofication {
     if ($ifUserLoggedInCheck ){
 
         $WorkingCSVFile | ForEach-Object {$_.ifUserLoggedIn = 'Yes'}
-        $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }else{
         $WorkingCSVFile | ForEach-Object {$_.ifUserLoggedIn = 'No'}
-        $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }
    
 
     #add Datto RMM variable value for ToastNotifications in CSV
     $WorkingCSVFile | ForEach-Object {$_.DattoRMMValue = $DattoRMMToastValue}
-    $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     
      #add text for ToastNotifications in CSV
     $WorkingCSVFile | ForEach-Object {$_.ToastText = $text}
-    $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
     #add ToastHeader for ToastNotifications in CSV
     $WorkingCSVFile | ForEach-Object {$_.ToastHeader = $Header}
-    $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     
      #add ToastHeaderidentifier
      $WorkingCSVFile | ForEach-Object {$_.ToastIdentifierName = $scriptname}
-     $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+     $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
      
 
     #Add what type of toast notification and we are sending in CSV and logo to be used
     if ($type -eq 'success'){
 
         $WorkingCSVFile | ForEach-Object {$_.type = 'Success'}
-        $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
        
     }elseif($type -eq 'error'){
         $WorkingCSVFile | ForEach-Object {$_.type = 'Error'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Error.png'}
-        $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
     }elseif ($type -eq 'warning'){
         $WorkingCSVFile | ForEach-Object {$_.type = 'Warning'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Warning.png'}
-        $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }
    
 
@@ -401,7 +401,10 @@ function send-CustomToastNofication {
         $FolderForToastNotifications = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty FolderForToastNotifications
         remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue
 
-        $WorkingCSVFile = Import-Csv "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
+        
+        $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
+
+        $WorkingCSVFile = Import-Csv  $CSVTAblePath
        
         #get identifier number for toast notification
         [int]$UniqueIdentifierNumber = ($WorkingCSVFile.UniqueIdentifier -split '---' | select-object -last 1)
@@ -426,7 +429,7 @@ function send-CustomToastNofication {
                 $WorkingCSVFile | foreach-object {
                     $_.UniqueIdentifier = $toastIdentifier
                 }
-                $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+                $WorkingCSVFile | export-csv -path $WorkingCSVFile -NoTypeInformation -ErrorAction Stop
                 
             }elseif ($DattoToastNotificationVar -eq 'Errors' -and ($toastType -eq 'Error')){ #only push toast notifications with errors 
             
@@ -439,7 +442,7 @@ function send-CustomToastNofication {
                 $WorkingCSVFile | foreach-object {
                     $_.UniqueIdentifier = $toastIdentifier
                 }
-                $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+                $WorkingCSVFile | export-csv -path  $WorkingCSVFile -NoTypeInformation -ErrorAction Stop
                 
             }elseif($DattoToastNotificationVar -eq 'WarningsErrors' -and ($toastType -eq 'Error' -or $toastType -eq 'Warning')){ #only push toast notifications with errors or warnings     
 
@@ -452,7 +455,7 @@ function send-CustomToastNofication {
                 $WorkingCSVFile | foreach-object {
                     $_.UniqueIdentifier = $toastIdentifier
                 }
-                $WorkingCSVFile | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+                $WorkingCSVFile | export-csv -path  $WorkingCSVFile -NoTypeInformation -ErrorAction Stop
                 
             }
         }
