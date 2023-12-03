@@ -517,13 +517,6 @@ Function send-finalToastNotification {
         .PARAMETER rootScriptFolder
             This paramter is required. It is a root folder for all scripts. E.g. c:\automations. It shold be full path. 
             It is required parameter
-        .PARAMETER text
-            This parameter is used to set text in toast notification
-            It is required parameter
-        .PARAMETER type
-            It is notification type. Depending on the type, different toast notification logo will be used. We upload logo to Datto component and copy to local workstation
-            If not provided, default toast notification logo will be used 'success.png'
-            Values are Success, Error, Warning
         .PARAMETER header
             This parameter is used to set header in toast notification
             it is required parameter
@@ -531,14 +524,15 @@ Function send-finalToastNotification {
             This parameter is used to determine when and what Toast nofications will be sent. We pull this from Datto RMM variable
             Datto variable Values are All, WarningsErrors, Errors, None 
             e.g. If none is set in Datto, no toast notifications will be sent etc.
-        .PARAMETER header
-            This parameter is used to set header in toast notification
+        .PARAMETER Company
+            This parameter is piece of information that are sent to teams
             it is required parameter
-        .PARAMETER FolderForToastNotifications
-            This parameter determine where Toast notification files will be stored.
-            If not specified, script will use default folder
+        .PARAMETER Action
+            This parameter is piece of information that are sent to teams
+        .PARAMETER SendToTeams
+            This parameter determines if toast notification will be sent to teams
         .EXAMPLE
-            send-CustomToastNofication -scriptname "Foxit_PDF_Reader" -rootScriptFolder  "c:\automations" -header "Foxit PDF Reader" -text "Installation completed successfully" -type warning -DattoRMMToastValue $DattoToastVar          
+            send-CustomToastNofication -scriptname "Foxit_PDF_Reader" -rootScriptFolder  "c:\automations" -header "Foxit PDF Reader" -DattoRMMToastValue $DattoToastVar -company $company -action $Action -SendToTeams $SendToTeams  
         .OUTPUTS
         .NOTES
             FunctionName : 
