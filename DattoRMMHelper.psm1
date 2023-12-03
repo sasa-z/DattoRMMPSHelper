@@ -65,8 +65,8 @@ function send-Log {
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     if(-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
 
-    New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null
-    New-Item -Path $ScriptFolderLocation -Name "Hidden_Files" -ItemType Directory -Force -ErrorAction Stop | out-null
+    if(-not (test-path "$scriptFolderLocation\Logs.txt")){New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null } 
+    if(-not (test-path "$scriptFolderLocation\Hidden_Files")){New-Item -Path $ScriptFolderLocation -Name "Hidden_Files" -ItemType Directory -Force -ErrorAction Stop | out-null } 
     $Folder = get-item "$($ScriptFolderLocation)\Hidden_Files" -Force
     $Folder.Attributes = "Hidden"
 
@@ -101,7 +101,7 @@ function send-Log {
     }
    
     if ($type -eq "Error"){
-            Add-Content -Value $logString -Path $ErrorLogFile
+            Add-Content -Value $logString -Path $ErrorLogFile 
             if(-not $skipWriteHost.IsPresent){write-host $logString}     
     }elseif($type -eq "Warning"){
             Add-Content -Value $logString  -Path $WarningLogFile
