@@ -163,7 +163,6 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$scriptname,
     [string]$FolderForToastNotifications = $FolderForToastNotifications,
-    [Parameter(Mandatory=$true)]
     [string]$ToastNotificationAppLogo,
     [hashtable]$EnvDattoVariablesValuesHashTable = $EnvDattoVariablesValuesHashTable
 )
