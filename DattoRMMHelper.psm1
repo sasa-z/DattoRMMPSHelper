@@ -322,6 +322,7 @@ function send-CustomToastNofication {
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
     #region toast notification items
 
+    #shorten parameter and remove \ if added at the end of the path
     if ($rootScriptFolder[-1] -like '\'){
         $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
     }else{
@@ -329,9 +330,17 @@ function send-CustomToastNofication {
     
     }
 
+    #if folder for toast notifications not provided via parameter, create it below
     if(-not $FolderForToastNotifications){
         $partForToastNOtifications = (Split-Path $root -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
+    }
+
+    #create hidden folder if it doesn't exist in script folder location
+    if(-not (Test-Path -Path "$($ScriptFolderLocation)\Hidden_Files")){
+        New-Item -Path $ScriptFolderLocation -Name 'Hidden_Files' -ItemType Directory -Force -ErrorAction Stop | out-null
+        $Folder = get-item "$($ScriptFolderLocation)\Hidden_Files" -Force
+        $Folder.Attributes = "Hidden"
     }
 
 
