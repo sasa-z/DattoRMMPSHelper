@@ -162,13 +162,18 @@ param(
     [string]$rootScriptFolder,
     [Parameter(Mandatory=$true)]
     [string]$scriptname,
-    [string]$FolderForToastNotifications = $FolderForToastNotifications,
+    [string]$FolderForToastNotifications,
     [string]$ToastNotificationAppLogo,
     [hashtable]$EnvDattoVariablesValuesHashTable = $EnvDattoVariablesValuesHashTable
 )
 
 $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 $root = $rootScriptFolder
+
+if(-not $FolderForToastNotifications){
+    $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
+    $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
+}
 
 #region create Automate folder and log file in c:\yw-data\ (no values/variables to change)
 try{
@@ -303,7 +308,7 @@ function send-CustomToastNofication {
         [string]$Header,
         [Parameter(Mandatory=$true)]
         [string]$DattoRMMToastValue,
-        [string]$FolderForToastNotifications = $FolderForToastNotifications,
+        [string]$FolderForToastNotifications,
         [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo
             
     )
@@ -311,6 +316,12 @@ function send-CustomToastNofication {
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
     #region toast notification items
+
+    if(-not $FolderForToastNotifications){
+        $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
+        $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
+    }
+
 
     if (-not (Test-Path -Path $FolderForToastNotifications)){
         New-Item -Path (Split-Path $FolderForToastNotifications -Parent) -Name (Split-Path $FolderForToastNotifications -Leaf) -ItemType Directory -Force -ErrorAction Stop | out-null
