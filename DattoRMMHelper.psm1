@@ -242,8 +242,10 @@ try{
     send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script variables values: " -scriptname $scriptname 
     send-log -scriptname $scriptName -rootScriptFolder $root "----------------------------------------------------------------------" -scriptname $scriptname
 
-    foreach ($dattoVar in $EnvDattoVariablesValuesHashTable.GetEnumerator()){
-        send-log -scriptname $scriptName -rootScriptFolder $root -logText "$($dattoVar.Value) : $($dattoVar.name)" -scriptname $scriptname -skipWriteHost
+    if ($EnvDattoVariablesValuesHashTable){
+        foreach ($dattoVar in $EnvDattoVariablesValuesHashTable.GetEnumerator()){
+            send-log -scriptname $scriptName -rootScriptFolder $root -logText "$($dattoVar.Value) : $($dattoVar.name)" -scriptname $scriptname -skipWriteHost
+        }
     }
     send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" -scriptname $scriptname
 
