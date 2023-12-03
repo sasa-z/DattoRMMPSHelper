@@ -169,7 +169,6 @@ param(
 
 $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 $root = $rootScriptFolder
-$toastNotificationsTableCSV = "$rootScriptFolder\$scriptName\Hidden_Files\ToastNotificationValuesTable.csv" #this is used in send-ToastNotification function
 
 #region create Automate folder and log file in c:\yw-data\ (no values/variables to change)
 try{
@@ -199,15 +198,7 @@ try{
         #region ToastNotification files
 
         #create CSV file for Toast Notification information
-        "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-        $WorkingCSVFile = Import-Csv "$toastNotificationsTableCSV"
-        $WorkingCSVFile.ToastHeader = $ToastNotificationHeader
-        $WorkingCSVFile.ToastIdentifierName = $toastIdentifierName
-        $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
-        $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
-        $WorkingCSVFile.UniqueIdentifier = "$($toastIdentifierName)-0"
-        $WorkingCSVFile | export-csv -path "$toastNotificationsTableCSV" -NoTypeInformation -ErrorAction Stop
-
+      
         #endregion ToastNotification files
 
     }catch{
@@ -290,7 +281,7 @@ function send-CustomToastNofication {
             This parameter is used to set header in toast notification
             it is required parameter
         .EXAMPLE
-            add-ScriptWorkingFoldersAndFiles -scriptname "Foxit_PDF_Reader" -rootScriptFolder  "c:\automations" -ToastNotificationAppLogo "c:\automations\FoxitPDFReader.png"            
+            send-CustomToastNofication -scriptname "Foxit_PDF_Reader" -rootScriptFolder  "c:\automations" -header "Foxit PDF Reader" -text "Installation completed successfully" -type Success -DattoRMMToastValue All          
         .OUTPUTS
         .NOTES
             FunctionName : 
@@ -328,9 +319,15 @@ function send-CustomToastNofication {
     }
 a
     #create CSV file if it doesn't exist
-    if (-not (Test-Path -Path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv")){   
-        "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-    }
+    "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+    $WorkingCSVFile = Import-Csv "$toastNotificationsTableCSV"
+    $WorkingCSVFile.ToastHeader = $Header
+    $WorkingCSVFile.ToastIdentifierName = $scriptname
+    $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
+    $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
+    $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
+    $WorkingCSVFile | export-csv -path "$toastNotificationsTableCSV" -NoTypeInformation -ErrorAction Stop
+
 
     $WorkingCSVFile = Import-Csv "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" 
 
