@@ -1,7 +1,6 @@
 
 
 $rootScriptFolder = "c:\yw-data\automate"
-$FolderForToastNotifications = "c:\yw-data\Toast_Notification_Files"
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
@@ -168,20 +167,26 @@ param(
 )
 
 $scriptFolderLocation = "$rootScriptFolder\$scriptName"
-$root = $rootScriptFolder
+
+if ($rootScriptFolder[-1] -like '\'){
+    $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+}else{
+    $root = $rootScriptFolder
+
+}
 
 if(-not $FolderForToastNotifications){
-    $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
+    $partForToastNOtifications = (Split-Path $root -Parent)
     $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
 }
 
 #region create Automate folder and log file in c:\yw-data\ (no values/variables to change)
 try{
-    New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
+    New-Item -Path "$root" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
     
     #remove previous folder is exists
-    if (test-path "$rootScriptFolder\$scriptName"){
-        Remove-Item -Path "$rootScriptFolder\$scriptName\" -Recurse -Force
+    if (test-path "$root\$scriptName"){
+        Remove-Item -Path "$root\$scriptName\" -Recurse -Force
     }
     New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null
 
@@ -317,8 +322,15 @@ function send-CustomToastNofication {
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
     #region toast notification items
 
+    if ($rootScriptFolder[-1] -like '\'){
+        $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+    }else{
+        $root = $rootScriptFolder
+    
+    }
+
     if(-not $FolderForToastNotifications){
-        $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
+        $partForToastNOtifications = (Split-Path $root -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
     }
 
@@ -394,23 +406,23 @@ function send-CustomToastNofication {
     #endregion
 
     #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
-    remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue
-    "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications" | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
-    $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempInfo.csv"
+    remove-item "$($root)\tempInfo.csv" -ErrorAction SilentlyContinue
+    "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications" | Export-Csv -Path "$($root)\tempInfo.csv" -NoTypeInformation
+    $ImportTempCSVInfo = Import-Csv "$($root)\tempInfo.csv"
     $ImportTempCSVInfo.ScriptName = $scriptName
     $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
-    $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
+    $ImportTempCSVInfo.rootScriptFolder = $root
     $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
-    $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
+    $ImportTempCSVInfo | Export-Csv -Path "$($root)\tempInfo.csv" -NoTypeInformation
     
     
     Invoke-AsCurrentUser {
 
         $ScriptName = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptName
         $ScriptFolderLocation = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptFolderLocation
-        $rootScriptFolder = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty rootScriptFolder
+        $root = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty rootScriptFolder
         $FolderForToastNotifications = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty FolderForToastNotifications
-        remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue
+        remove-item "$($root)\tempInfo.csv" -ErrorAction SilentlyContinue
 
         
         $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
