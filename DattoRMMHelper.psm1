@@ -740,7 +740,7 @@ Function send-finalToastNotification {
 
      #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
      try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}
-     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications", "ToastHeader","UserLoggedIn" | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
+     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","ToastNotifications","FolderForToastNotifications", "ToastHeader","UserLoggedIn" | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
      $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempFinalInfo.csv"
      $ImportTempCSVInfo.ScriptName = $scriptName
      $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
@@ -748,6 +748,7 @@ Function send-finalToastNotification {
      $ImportTempCSVInfo.UserLoggedIn = $UserLoggedIn
      $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
      $ImportTempCSVInfo.ToastHeader = $Header
+     $ImportTempCSVInfo.ToastNotifications = $ToastNotifications
      $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
      
     
@@ -767,6 +768,7 @@ Function send-finalToastNotification {
                 $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
                 $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
+                $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
                 try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
