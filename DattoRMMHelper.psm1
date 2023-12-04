@@ -826,7 +826,7 @@ Function send-finalToastNotification {
       $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
       
       $parameters = @{
-          "URI"         = "https://yanceyworks.webhook.office.com/webhookb2/ef3e6832-3ae4-447f-ba86-9871cd3e1ff4@fa98d178-754f-4517-a5b8-7d256ebbcee8/IncomingWebhook/4b821524f5c442189a113598706b9be8/5f888ae7-1d3e-4c33-8d23-af488e45d72e"
+          "URI"         = ""
           "Method"      = 'POST'
           "Body"        = $TeamMessageBody
           "ContentType" = 'application/json'
@@ -914,7 +914,7 @@ $JSONBody = [PSCustomObject][Ordered]@{
       $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
       
       $parameters = @{
-          "URI"         = "https://yanceyworks.webhook.office.com/webhookb2/ef3e6832-3ae4-447f-ba86-9871cd3e1ff4@fa98d178-754f-4517-a5b8-7d256ebbcee8/IncomingWebhook/4b821524f5c442189a113598706b9be8/5f888ae7-1d3e-4c33-8d23-af488e45d72e"
+          "URI"         = ""
           "Method"      = 'POST'
           "Body"        = $TeamMessageBody
           "ContentType" = 'application/json'
