@@ -467,8 +467,8 @@ function send-CustomToastNofication {
         [ValidateSet('Success', 'Error', 'Warning')]
         [string]$type = "Success",
         [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
-        [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo,
         [string]$ToastNotifications = $ToastNotifications,
+        [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo,
         [string]$FolderForToastNotifications,
         [string]$scriptname = $scriptname,
         [string]$rootScriptFolder = $rootScriptFolder
