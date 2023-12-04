@@ -616,7 +616,8 @@ function send-CustomToastNofication {
 
 
         #increase unique identifier number so the new notification doesn't overwrite previous one
-        $newToastIdentifier = $toastIdentifierName + '---' + $UniqueIdentifierNumber++
+        $Increase = $UniqueIdentifierNumber + 1
+        $newToastIdentifier = $toastIdentifierName + '---' + $Increase
         $WorkingCSVFile | foreach-object {
             $_.UniqueIdentifier = $newToastIdentifier
         }
