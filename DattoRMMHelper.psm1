@@ -714,8 +714,8 @@ Function send-finalToastNotification {
          [string]$Company,
          [string]$Action,
          [string]$SendToTeams,
-         [string]$rootScriptFolder,    
-         [string]$scriptname
+         [string]$rootScriptFolder = $rootScriptFolder,    
+         [string]$scriptname = $scriptname
 
              
      )
