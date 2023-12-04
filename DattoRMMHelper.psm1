@@ -751,7 +751,7 @@ Function send-finalToastNotification {
         if ($ToastNotifications -eq 'all'){  #send toast notification per Datto RMM variable
 
             write-host "ToastNotifications Value is ALL" -ForegroundColor Green
-            
+
             Invoke-AsCurrentUser {
 
                 $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
@@ -761,7 +761,7 @@ Function send-finalToastNotification {
                 try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
-                   if ($DattoToastNotificationVar -eq 'All'){ #alway push toast notifications
+                   if ($ToastNotifications -eq 'All'){ #alway push toast notifications
                        New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\Toast_Notification_Files\success.png" -UniqueIdentifier "$scriptname"
                    }
                }
@@ -849,7 +849,7 @@ Function send-finalToastNotification {
                 try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
-                   if ($DattoToastNotificationVar -eq 'All' -or $DattoToastNotificationVar -eq 'Errors' -or $DattoToastNotificationVar -eq 'WarningsErrors'){ 
+                   if ($ToastNotifications -eq 'All' -or $DattoToastNotificationVar -eq 'Errors' -or $DattoToastNotificationVar -eq 'WarningsErrors'){ 
                        New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED WITH ERRORS/WARNINGS" -AppLogo "$($FolderForToastNotifications)\Toast_Notification_Files\error.png" -UniqueIdentifier "$scriptname"
                    }
                }
