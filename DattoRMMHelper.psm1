@@ -621,6 +621,8 @@ function send-CustomToastNofication {
             $_.UniqueIdentifier = $newToastIdentifier
         }
         $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+
+        write-host "Toast identifier: $($newToastIdentifier)" -ForegroundColor Yellow
         
         if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
             #handle when and if Toast notification will be pushed depending on what was selected in Datto and what type of notification in script (success, error or warning)
