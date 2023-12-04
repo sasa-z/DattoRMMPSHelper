@@ -284,7 +284,7 @@ Function add-ScriptWorkingFoldersAndFiles{
             It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter. 
             It is required parameter
         .PARAMETER rootScriptFolder
-            This paramter is required. It is a root folder for all scripts. E.g. c:\automations. It shold be full path. 
+            It is a root folder for all scripts. E.g. c:\automations. It shold be full path. 
             It is required parameter
         .PARAMETER ToastNotificationAppLogo
             This parameter is used to copy app logo into script folder from Datto RMM. It is used in send-ToastNotification function within this module
@@ -665,7 +665,6 @@ Function send-finalToastNotification {
             It is required parameter
         .PARAMETER header
             This parameter is used to set header in toast notification
-            it is required parameter
         .PARAMETER ToastNotifications
             This parameter is used to determine when and what Toast nofications will be sent. We pull this from Datto RMM variable
             Datto variable Values are All, WarningsErrors, Errors, None 
@@ -688,7 +687,6 @@ Function send-finalToastNotification {
     
      [CmdletBinding()]
      param(
-         [Parameter(Mandatory=$true)]
          [string]$Header,
          [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
          [string]$ToastNotifications = $ToastNotifications,
@@ -705,7 +703,7 @@ Function send-finalToastNotification {
         $ToastNotifications = $env:ToastNotifications
     }
 
-    write-host "ToastNotifications value for finaToastlNotification is : " $ToastNotifications
+    write-host "ToastNotifications value for finalToastlNotification is : " $ToastNotifications
     
     if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
     if (-not $Action){$Action = $ENV:Action}
@@ -724,6 +722,9 @@ Function send-finalToastNotification {
         $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
     }
+
+    write-host "Folder for toast notification files is : " $FolderForToastNotifications
+
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
     
