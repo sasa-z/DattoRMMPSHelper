@@ -1,7 +1,7 @@
 
 
 $scriptname = "Google_Chrome"
-$ToastNotifications = $env:ToastNotifications
+$ToastNotifications = 'All'
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
