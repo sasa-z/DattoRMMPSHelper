@@ -707,18 +707,13 @@ Function send-finalToastNotification {
 
     write-host "ToastNotifications value for finaToastlNotification is : " $ToastNotifications
     
-    if (-not $Company){
-        $Company = $ENV:CS_PROFILE_NAME
-    }
-    if (-not $Action){
-        $Action = $ENV:Action
-    }
+    if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
+    if (-not $Action){$Action = $ENV:Action}
+    if (-not $SendToTeams){$SendToTeams = $ENV:SendFinalResultToTeams}
 
     if ($rootScriptFolder[-1] -like '\'){
-
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
     }else{
-
         $rootScriptFolder = $rootScriptFolder 
     }
 
