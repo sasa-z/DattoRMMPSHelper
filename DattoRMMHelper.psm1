@@ -554,10 +554,7 @@ function send-CustomToastNofication {
     $WorkingCSVFile | ForEach-Object {$_.ToastHeader = $Header}
     $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     
-     #add ToastHeaderidentifier
-     $WorkingCSVFile | ForEach-Object {$_.ToastIdentifierName = $scriptname}
-     $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-     
+
 
     #Add what type of toast notification and we are sending in CSV and logo to be used
     if ($type -eq 'success'){
@@ -604,7 +601,7 @@ function send-CustomToastNofication {
 
         $WorkingCSVFile = Import-Csv  $CSVTAblePath
        
-        #get identifier number for toast notification
+        #get values from CSV
         [int]$UniqueIdentifierNumber = ($WorkingCSVFile.UniqueIdentifier -split '---' | select-object -last 1)
         $ToastHeader = $WorkingCSVFile.ToastHeader 
         $ToastText = $WorkingCSVFile.ToastText 
@@ -614,47 +611,24 @@ function send-CustomToastNofication {
         $toastIdentifier = $toastIdentifierName + '---' + $UniqueIdentifierNumber
         $DattoToastNotificationVar = $WorkingCSVFile.DattoRMMValue
         $userIsLoggedIn = $WorkingCSVFile.ifUserLoggedIn
+
+
+
+        #increase unique identifier number so the new notification doesn't overwrite previous one
+        $newToastIdentifier = $toastIdentifierName + '---' + $UniqueIdentifierNumber++
+        $WorkingCSVFile | foreach-object {
+            $_.UniqueIdentifier = $newToastIdentifier
+        }
+        $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
         
         if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
             #handle when and if Toast notification will be pushed depending on what was selected in Datto and what type of notification in script (success, error or warning)
             if ($DattoToastNotificationVar -eq 'All'){ #alway push toast notifications
-            
-                $toastIdentifier = $toastIdentifierName + '---' + $UniqueIdentifierNumber++
                 New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "$FolderForToastNotifications\$ToastAppLogo" -UniqueIdentifier "$toastIdentifier"
-                $toastIdentifier = $toastIdentifierName + '---' + $UniqueIdentifierNumber++
-                
-                #increase unique identifier number so the new notification doesn't overwrite previous one
-                $WorkingCSVFile | foreach-object {
-                    $_.UniqueIdentifier = $toastIdentifier
-                }
-                $WorkingCSVFile | export-csv -path $WorkingCSVFile -NoTypeInformation -ErrorAction Stop
-                
-            }elseif ($DattoToastNotificationVar -eq 'Errors' -and ($toastType -eq 'Error')){ #only push toast notifications with errors 
-            
-                $toastIdentifier = $toastIdentifierName + '-' + $UniqueIdentifierNumber++
-                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "c:\yw-data\Toast_Notification_Files\$($ToastAppLogo)" -UniqueIdentifier "$toastIdentifier"
-                
-                $toastIdentifier = $toastIdentifierName + '-' + $UniqueIdentifierNumber++
-                
-                #increase unique identifier number so the new notification doesn't overwrite previous one
-                $WorkingCSVFile | foreach-object {
-                    $_.UniqueIdentifier = $toastIdentifier
-                }
-                $WorkingCSVFile | export-csv -path  $WorkingCSVFile -NoTypeInformation -ErrorAction Stop
-                
+            }elseif ($DattoToastNotificationVar -eq 'Errors' -and ($toastType -eq 'Error')){ #only push toast notifications with errors        
+                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "c:\yw-data\Toast_Notification_Files\$($ToastAppLogo)" -UniqueIdentifier "$toastIdentifier"                           
             }elseif($DattoToastNotificationVar -eq 'WarningsErrors' -and ($toastType -eq 'Error' -or $toastType -eq 'Warning')){ #only push toast notifications with errors or warnings     
-
-                $toastIdentifier = $toastIdentifierName + '-' + $UniqueIdentifierNumber++
-                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "c:\yw-data\Toast_Notification_Files\$($ToastAppLogo)" -UniqueIdentifier "$toastIdentifier"
-    
-                $toastIdentifier = $toastIdentifierName + '-' + $UniqueIdentifierNumber++
-                
-                #increase unique identifier number so the new notification doesn't overwrite previous one
-                $WorkingCSVFile | foreach-object {
-                    $_.UniqueIdentifier = $toastIdentifier
-                }
-                $WorkingCSVFile | export-csv -path  $WorkingCSVFile -NoTypeInformation -ErrorAction Stop
-                
+                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "c:\yw-data\Toast_Notification_Files\$($ToastAppLogo)" -UniqueIdentifier "$toastIdentifier"                
             }
         }
         
