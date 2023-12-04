@@ -591,8 +591,8 @@ function send-CustomToastNofication {
     Invoke-AsCurrentUser {
 
         $ScriptName = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptName
-        $ScriptFolderLocation = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptFolderLocation
         $rootScriptFolder = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty rootScriptFolder
+        $ScriptFolderLocation = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptFolderLocation
         $FolderForToastNotifications = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty FolderForToastNotifications
         try{remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
 
@@ -612,6 +612,7 @@ function send-CustomToastNofication {
         $DattoToastNotificationVar = $WorkingCSVFile.DattoRMMValue
         $userIsLoggedIn = $WorkingCSVFile.ifUserLoggedIn
 
+        write-host "Toast identifier: $($toastIdentifier)" -ForegroundColor Yellow
 
 
         #increase unique identifier number so the new notification doesn't overwrite previous one
