@@ -326,6 +326,7 @@ if ($rootScriptFolder[-1] -like '\'){
 
 $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 
+
 if(-not $FolderForToastNotifications){
     $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
     $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
@@ -391,7 +392,7 @@ try{
     send-log  -logText "Script name: $($ScriptName) " 
     send-log  -logText "----------------------------------------------------------------------" 
     send-log  -logText "Script variables values: "
-    send-log  -logText  $rootScriptFolder "----------------------------------------------------------------------"
+    send-log  -logText  "----------------------------------------------------------------------"
 
     if ($EnvDattoVariablesValuesHashTable){
         foreach ($dattoVar in $EnvDattoVariablesValuesHashTable.GetEnumerator()){
