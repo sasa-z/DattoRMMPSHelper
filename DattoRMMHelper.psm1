@@ -704,6 +704,8 @@ Function send-finalToastNotification {
      if (-not $ToastNotifications){
         $ToastNotifications = $env:ToastNotifications
     }
+
+    write-host "ToastNotifications value for finaToastlNotification is : " $ToastNotifications
     
     if (-not $Company){
         $Company = $ENV:CS_PROFILE_NAME
