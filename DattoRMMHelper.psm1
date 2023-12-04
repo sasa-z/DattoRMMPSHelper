@@ -66,9 +66,9 @@ function send-Log {
         [ValidateSet('Below', 'Above')]
         [string]$addDashes,
         [switch]$addTeamsMessage,
+        [switch]$skipWriteHost,
         [string]$scriptname = $scriptname,
-        [string]$rootScriptFolder = $rootScriptFolder,
-        [switch]$skipWriteHost
+        [string]$rootScriptFolder = $rootScriptFolder
 
     )
 
@@ -305,11 +305,11 @@ Function add-ScriptWorkingFoldersAndFiles{
 [CmdletBinding()]
 param(
 
-    [string]$rootScriptFolder = $rootScriptFolder,
-    [string]$scriptname = $scriptname,
-    [string]$FolderForToastNotifications,
     [string]$ToastNotificationAppLogo,
-    [hashtable]$EnvDattoVariablesValuesHashTable = $EnvDattoVariablesValuesHashTable
+    [string]$FolderForToastNotifications,
+    [hashtable]$EnvDattoVariablesValuesHashTable = $EnvDattoVariablesValuesHashTable,
+    [string]$rootScriptFolder = $rootScriptFolder,
+    [string]$scriptname = $scriptname
 )
 
 if (-not $rootScriptFolder){
@@ -460,18 +460,18 @@ function send-CustomToastNofication {
     [CmdletBinding()]
     param(
 
-        [string]$scriptname = $scriptname,
-        [string]$rootScriptFolder = $rootScriptFolder,
-        [ValidateSet('Success', 'Error', 'Warning')]
-        [string]$type = "Success",
-        [Parameter(Mandatory=$true)]
-        [string]$text,
         [Parameter(Mandatory=$true)]
         [string]$Header,
+        [Parameter(Mandatory=$true)]
+        [string]$text,
+        [ValidateSet('Success', 'Error', 'Warning')]
+        [string]$type = "Success",
         [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
+        [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo,
         [string]$ToastNotifications = $ToastNotifications,
         [string]$FolderForToastNotifications,
-        [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo
+        [string]$scriptname = $scriptname,
+        [string]$rootScriptFolder = $rootScriptFolder
             
     )
 
@@ -707,15 +707,15 @@ Function send-finalToastNotification {
     
      [CmdletBinding()]
      param(
-         [string]$rootScriptFolder,    
-         [string]$scriptname,
-         [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
-         [string]$ToastNotifications = $ToastNotifications,
          [Parameter(Mandatory=$true)]
          [string]$Header,
+         [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
+         [string]$ToastNotifications = $ToastNotifications,
          [string]$Company,
          [string]$Action,
-         [string]$SendToTeams
+         [string]$SendToTeams,
+         [string]$rootScriptFolder,    
+         [string]$scriptname
 
              
      )
