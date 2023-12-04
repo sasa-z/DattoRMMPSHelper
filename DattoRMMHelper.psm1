@@ -1,6 +1,7 @@
 
 
-$rootScriptFolder = "c:\yw-data\automate"
+$scriptname = "Google_Chrome"
+$ToastNotifications = $env:ToastNotifications
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
@@ -20,7 +21,6 @@ $EnvDattoVariablesValuesHashTable.Add("SendFinalResultToTeams", "Send final scri
 # $dattoEnvironmentVaribleValue = $env:ToastNotifications #pull from Datto
 $dattoEnvironmentVaribleValue = "all" 
 
-$DattoRMMToastValue = 'all'
 
 
 
@@ -32,11 +32,13 @@ function send-Log {
         .DESCRIPTION
             Writes log to a text file stored in script folder and some of the output will be written to console. Some of this information 
             is used by other functions in this module such as sending notification to Microsoft Teams
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+                $scriptName
+                $rootScriptFolder (it can be specified as global variable in Datto as well)
         .PARAMETER scriptName
-            It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter
-            send-log -scriptname "some script name" -logText "some text" -type "Info" -addDashes "Below" -addTeamsMessage 
+            It is a script name that we use to create a folder for this script in root scripts working folder
         .PARAMETER rootScriptFolder
-            This paramter is required. It is a root folder for all scripts. E.g. c:\automations. It shold be full path.
+            It is a root folder for all scripts. E.g. c:\automations. It shold be full path.
         .PARAMETER logText
             It is a text that we want to write to log file or/and console
         .PARAMETER type
@@ -46,8 +48,8 @@ function send-Log {
         .PARAMETER addTeamsMessage
             It stores log file we want into a text file that will be used by send-ToastNotification function within this module
         .EXAMPLE
-            send-log -scriptname "Foxit_PDF_Reader" rootScriptFolder "c:\automations" -logText "some text" -type error
-            send-log -scriptname "some script name" rootScriptFolder "c:\automations" -logText "some text" -type Info -addDashes "Below" -addTeamsMessage 
+            send-log -logText "some text" -type error
+            send-log -logText "some text" -type Info -addDashes "Below" -addTeamsMessage 
         .OUTPUTS
         .NOTES
             FunctionName : 
@@ -64,13 +66,21 @@ function send-Log {
         [ValidateSet('Below', 'Above')]
         [string]$addDashes,
         [switch]$addTeamsMessage,
-        [Parameter(Mandatory=$true)]
         [string]$scriptname = $scriptname,
-        [Parameter(Mandatory=$true)]
-        [string]$rootScriptFolder = $rootFolderForAllScriptFullPath,
+        [string]$rootScriptFolder = $rootScriptFolder,
         [switch]$skipWriteHost
 
     )
+
+    if (-not $rootScriptFolder){
+        $rootScriptFolder = $env:rootScriptFolder
+    }
+
+    if ($rootScriptFolder[-1] -like '\'){
+        $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+    }else{
+        $rootScriptFolder = $rootScriptFolder
+    }
 
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     if(-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
@@ -130,23 +140,46 @@ function send-Log {
 
 function get-runAsUserModule {
 
+     <#
+        .SYNOPSIS
+            Check if RunAsUserModule is installed
+        .DESCRIPTION
+            Check if RunAsUserModule is installed and add information to log file
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+                $scriptName
+                $rootScriptFolder
+        .PARAMETER scriptName
+            It is a script name that we use to create a folder for this script in root scripts working folder
+        .PARAMETER rootScriptFolder
+            It is a root folder for all scripts. E.g. c:\automations. It shold be full path.
+        .EXAMPLE
+            get-runAsUserModule 
+        .OUTPUTS
+        .NOTES
+            FunctionName : 
+            Created by   : Sasa Zelic
+            Date Coded   : 12/2019
+     #>
+
     [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$rootScriptFolder,
-    [Parameter(Mandatory=$true)]
-    [string]$scriptname
-)
+        param(
+            [string]$rootScriptFolder = $rootScriptFolder,
+            [string]$scriptname = $scriptname
+        )
 
 
-if ($rootScriptFolder[-1] -like '\'){
-    $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
-}else{
-    $root = $rootScriptFolder
-}
+        if (-not $rootScriptFolder){
+            $rootScriptFolder = $env:rootScriptFolder
+        }
+
+        if ($rootScriptFolder[-1] -like '\'){
+            $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+        }else{
+            $rootScriptFolder = $rootScriptFolder
+        }
 
 #create script folder if it doesn't exist
-if (-not (test-path "$root\$scriptName")){New-Item -Path "$root" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
 
 
     $RunAsUser = get-module RunAsUser -ListAvailable -ErrorAction stop
@@ -157,10 +190,10 @@ if (-not (test-path "$root\$scriptName")){New-Item -Path "$root" -Name "$scriptN
         try{
             Install-Module RunAsUser -Force -confirm:$false
     
-            send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Successfully installed RunAsUser module" -type Info -addDashes Below
+            send-log  -logText "Successfully installed RunAsUser module" -type Info -addDashes Below
     
         }catch{
-            send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Failed to install RunAsUser module with error:  $($_.exception.message). Exiting script" -type Error -addDashes Below
+            send-log  -logText "Failed to install RunAsUser module with error:  $($_.exception.message). Exiting script" -type Error -addDashes Below
             exit 1            
         }
     }
@@ -169,23 +202,46 @@ if (-not (test-path "$root\$scriptName")){New-Item -Path "$root" -Name "$scriptN
 
 function get-BurntToastModule {
 
-    
-    [CmdletBinding()]
-param(
-    [Parameter(Mandatory=$true)]
-    [string]$rootScriptFolder,
-    [Parameter(Mandatory=$true)]
-    [string]$scriptname
-)
+     <#
+        .SYNOPSIS
+            Check if RunAsUserModule is installed
+        .DESCRIPTION
+            Check if RunAsUserModule is installed and add information to log file
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+                $scriptName
+                $rootScriptFolder 
+        .PARAMETER scriptName
+            It is a script name that we use to create a folder for this script in root scripts working folder
+        .PARAMETER rootScriptFolder
+            It is a root folder for all scripts. E.g. c:\automations. It shold be full path.
+        .EXAMPLE
+            get-burntToastModule 
+        .OUTPUTS
+        .NOTES
+            FunctionName : 
+            Created by   : Sasa Zelic
+            Date Coded   : 12/2019
+     #>
 
-if ($rootScriptFolder[-1] -like '\'){
-    $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
-}else{
-    $root = $rootScriptFolder
-}
+
+[CmdletBinding()]
+     param(
+         [string]$rootScriptFolder = $rootScriptFolder,
+         [string]$scriptname = $scriptname
+     )
+
+     if (-not $rootScriptFolder){
+        $rootScriptFolder = $env:rootScriptFolder
+    }
+
+    if ($rootScriptFolder[-1] -like '\'){
+        $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+    }else{
+        $rootScriptFolder = $rootScriptFolder
+    }
 
 #create script folder if it doesn't exist
-if (-not (test-path "$root\$scriptName")){New-Item -Path "$root" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
 
 
     $BruntToast = get-module BurntToast -ListAvailable -ErrorAction stop
@@ -193,22 +249,22 @@ if ($BruntToast){
     try{
         Import-Module BurntToast -ErrorAction stop
 
-        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Successfully imported BurntToast module"
+        send-log -logText "Successfully imported BurntToast module"
         
     }catch{
-        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Failed to import BurntToast module with error:  $($_.exception.message)" -type Error
-        exit 1
+        send-log -logText "Failed to import BurntToast module with error:  $($_.exception.message)" -type Warning
+        
     }
     
 }else{
     try{
         Install-Module -Name BurntToast -RequiredVersion 0.8.5  -Confirm:$false -Force
 
-        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Successfully installed BurntToast module"
+        send-log -logText "Successfully installed BurntToast module"
         
 
     }catch{
-        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Failed to install BurntToast module with error:  $($_.exception.message)" -type Error
+        send-log -logText "Failed to install BurntToast module with error:  $($_.exception.message)" -type Warning
 
     }
 }
@@ -221,6 +277,9 @@ Function add-ScriptWorkingFoldersAndFiles{
             Create all files into script folder
         .DESCRIPTION
             It creates all files into script and root scripts working folder that will be used by other functions such as logs.txt, errors.txt, warnings.txt
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+                $scriptName
+                $rootScriptFolder
         .PARAMETER scriptName
             It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter. 
             It is required parameter
@@ -245,36 +304,40 @@ Function add-ScriptWorkingFoldersAndFiles{
     
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory=$true)]
-    [string]$rootScriptFolder,
-    [Parameter(Mandatory=$true)]
-    [string]$scriptname,
+
+    [string]$rootScriptFolder = $rootScriptFolder,
+    [string]$scriptname = $scriptname,
     [string]$FolderForToastNotifications,
     [string]$ToastNotificationAppLogo,
     [hashtable]$EnvDattoVariablesValuesHashTable = $EnvDattoVariablesValuesHashTable
 )
 
-$scriptFolderLocation = "$rootScriptFolder\$scriptName"
-
-if ($rootScriptFolder[-1] -like '\'){
-    $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
-}else{
-    $root = $rootScriptFolder
-
+if (-not $rootScriptFolder){
+    $rootScriptFolder = $env:rootScriptFolder
 }
 
+
+if ($rootScriptFolder[-1] -like '\'){
+    $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+}else{
+    $rootScriptFolder = $rootScriptFolder
+    
+}
+
+$scriptFolderLocation = "$rootScriptFolder\$scriptName"
+
 if(-not $FolderForToastNotifications){
-    $partForToastNOtifications = (Split-Path $root -Parent)
+    $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
     $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
 }
 
 #region create Automate folder and log file in c:\yw-data\ (no values/variables to change)
 try{
-    New-Item -Path "$root" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
+    New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
     
     #remove previous folder is exists
-    if (test-path "$root\$scriptName"){
-        Remove-Item -Path "$root\$scriptName\" -Recurse -Force
+    if (test-path "$rootScriptFolder\$scriptName"){
+        Remove-Item -Path "$rootScriptFolder\$scriptName\" -Recurse -Force
     }
     New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null
 
@@ -300,7 +363,7 @@ try{
         #endregion ToastNotification files
 
     }catch{
-        send-Log -scriptname $scriptName -rootScriptFolder $root -logText "Failed to create "$FolderForToastNotifications" folder. Error:  $($_.exception.message)" -type Error
+        send-Log -logText "Failed to create "$FolderForToastNotifications" folder. Error:  $($_.exception.message)" -type Error
     
     }
    
@@ -320,29 +383,29 @@ try{
     }
         copy-item Chocolatey.png -Destination "$($FolderForToastNotifications)\Chocolatey.png" -Force -ErrorAction SilentlyContinue
     }catch{
-        send-Log -scriptname $scriptName -rootScriptFolder $root  -logText "Failed to copy Toast Notification logos :  $($_.exception.message)" -type Warning 
+        send-Log -logText "Failed to copy Toast Notification logos :  $($_.exception.message)" -type Warning 
     }
     
    
     #add variable values into log file
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script name: $($ScriptName) " 
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" 
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Script variables values: "
-    send-log -scriptname $scriptName -rootScriptFolder $root "----------------------------------------------------------------------"
+    send-log  -logText "Script name: $($ScriptName) " 
+    send-log  -logText "----------------------------------------------------------------------" 
+    send-log  -logText "Script variables values: "
+    send-log  -logText  $rootScriptFolder "----------------------------------------------------------------------"
 
     if ($EnvDattoVariablesValuesHashTable){
         foreach ($dattoVar in $EnvDattoVariablesValuesHashTable.GetEnumerator()){
-            send-log -scriptname $scriptName -rootScriptFolder $root -logText "$($dattoVar.Value) : $($dattoVar.name)" -skipWriteHost
+            send-log  -logText "$($dattoVar.Value) : $($dattoVar.name)" -skipWriteHost
         }
     }
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "----------------------------------------------------------------------" 
+    send-log  -logText "----------------------------------------------------------------------" 
 
-    send-log -scriptname $scriptName -rootScriptFolder $root -logText "Successfully created script working folder $ScriptFolderLocation" 
+    send-log  -logText "Successfully created script working folder $ScriptFolderLocation" 
    
 
 
 }catch{
-    send-Log -scriptname $scriptName -rootScriptFolder $root -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message)" -type Error -addDashes Below 
+    send-Log -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message)" -type Error -addDashes Below 
 
     exit 1
 }
@@ -354,13 +417,16 @@ function send-CustomToastNofication {
         .SYNOPSIS
             Send Windows Toast Notifications
         .DESCRIPTION
-            It sends Toast Notifications so we can track script execution or see script afinal result
+            It sends Toast Notifications so we can track script execution or see script final result
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+                $scriptName
+                $rootScriptFolder
+                $ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM)
         .PARAMETER scriptName
-            It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter. 
+            It is a script name that we use to create a folder for this script in root scripts working folder. 
             It is required parameter
         .PARAMETER rootScriptFolder
             This paramter is required. It is a root folder for all scripts. E.g. c:\automations. It shold be full path. 
-            It is required parameter
         .PARAMETER text
             This parameter is used to set text in toast notification
             It is required parameter
@@ -371,7 +437,7 @@ function send-CustomToastNofication {
         .PARAMETER header
             This parameter is used to set header in toast notification
             it is required parameter
-        .PARAMETER DattoRMMToastValue
+        .PARAMETER ToastNotifications
             This parameter is used to determine when and what Toast nofications will be sent. We pull this from Datto RMM variable
             Datto variable Values are All, WarningsErrors, Errors, None 
             e.g. If none is set in Datto, no toast notifications will be sent etc.
@@ -392,39 +458,46 @@ function send-CustomToastNofication {
     
     [CmdletBinding()]
     param(
-        [Parameter(Mandatory=$true)]
-        [string]$rootScriptFolder,    
+
+        [string]$scriptname = $scriptname,
+        [string]$rootScriptFolder = $rootScriptFolder,
         [ValidateSet('Success', 'Error', 'Warning')]
         [string]$type = "Success",
         [Parameter(Mandatory=$true)]
         [string]$text,
         [Parameter(Mandatory=$true)]
-        [string]$scriptname,
-        [Parameter(Mandatory=$true)]
         [string]$Header,
-        [Parameter(Mandatory=$true)]
-        [string]$DattoRMMToastValue,
+        [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
+        [string]$ToastNotifications = $ToastNotifications,
         [string]$FolderForToastNotifications,
         [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo
             
     )
 
+
+    if (-not $rootScriptFolder){
+        $rootScriptFolder = $env:rootScriptFolder
+    }
+
+    if (-not $ToastNotifications){
+        $ToastNotifications = $env:ToastNotifications
+    }
+
+    if ($rootScriptFolder[-1] -like '\'){
+        $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+    }else{
+        $rootScriptFolder = $rootScriptFolder
+        
+    }
     
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
     #region toast notification items
     
-    #shorten parameter and remove \ if added at the end of the path
-    if ($rootScriptFolder[-1] -like '\'){
-        $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
-    }else{
-        $root = $rootScriptFolder
-        
-    }
     
     #if folder for toast notifications not provided via parameter, create it below
     if(-not $FolderForToastNotifications){
-        $partForToastNOtifications = (Split-Path $root -Parent)
+        $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
     }
 
@@ -469,7 +542,7 @@ function send-CustomToastNofication {
    
 
     #add Datto RMM variable value for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.DattoRMMValue = $DattoRMMToastValue}
+    $WorkingCSVFile | ForEach-Object {$_.DattoRMMValue = $ToastNotifications}
     $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     
      #add text for ToastNotifications in CSV
@@ -507,23 +580,23 @@ function send-CustomToastNofication {
     #endregion
 
     #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
-    try{remove-item "$($root)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
-    "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications" | Export-Csv -Path "$($root)\tempInfo.csv" -NoTypeInformation
-    $ImportTempCSVInfo = Import-Csv "$($root)\tempInfo.csv"
+    try{remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
+    "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications" | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
+    $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempInfo.csv"
     $ImportTempCSVInfo.ScriptName = $scriptName
     $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
-    $ImportTempCSVInfo.rootScriptFolder = $root
+    $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
     $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
-    $ImportTempCSVInfo | Export-Csv -Path "$($root)\tempInfo.csv" -NoTypeInformation
+    $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
     
     
     Invoke-AsCurrentUser {
 
         $ScriptName = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptName
         $ScriptFolderLocation = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptFolderLocation
-        $root = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty rootScriptFolder
+        $rootScriptFolder = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty rootScriptFolder
         $FolderForToastNotifications = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty FolderForToastNotifications
-        try{remove-item "$($root)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
+        try{remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
 
         
         $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
@@ -597,7 +670,11 @@ Function send-finalToastNotification {
         .SYNOPSIS
             Send Windows Toast Notifications
         .DESCRIPTION
-            It sends Toast Notifications so we can track script execution or see script afinal result
+            It sends Toast Notifications so we can track script execution or see script final result
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+                $scriptName
+                $rootScriptFolder
+                $ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM or in script)
         .PARAMETER scriptName
             It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter. 
             It is required parameter
@@ -607,7 +684,7 @@ Function send-finalToastNotification {
         .PARAMETER header
             This parameter is used to set header in toast notification
             it is required parameter
-        .PARAMETER DattoRMMToastValue
+        .PARAMETER ToastNotifications
             This parameter is used to determine when and what Toast nofications will be sent. We pull this from Datto RMM variable
             Datto variable Values are All, WarningsErrors, Errors, None 
             e.g. If none is set in Datto, no toast notifications will be sent etc.
@@ -629,41 +706,41 @@ Function send-finalToastNotification {
     
      [CmdletBinding()]
      param(
-         [Parameter(Mandatory=$true)]
          [string]$rootScriptFolder,    
-         [Parameter(Mandatory=$true)]
          [string]$scriptname,
-         [Parameter(Mandatory=$true)]
-         [string]$DattoRMMToastValue,
+         [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
+         [string]$ToastNotifications = $ToastNotifications,
          [Parameter(Mandatory=$true)]
          [string]$Header,
-         [Parameter(Mandatory=$true)]
          [string]$Company,
-         [Parameter(Mandatory=$true)]
          [string]$Action,
          [string]$SendToTeams
 
              
      )
  
-
-    #shorten parameter and remove \ if added at the end of the path
-    if ($rootScriptFolder[-1] -like '\'){
-        $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
-    }else{
-        $root = $rootScriptFolder
-    
+     if (-not $ToastNotifications){
+        $ToastNotifications = $env:ToastNotifications
     }
 
-    $scriptFolderLocation = "$root\$scriptName"
+    if ($rootScriptFolder[-1] -like '\'){
+
+        $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+    }else{
+
+        $rootScriptFolder = $rootScriptFolder 
+    }
+
+    $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 
      #if folder for toast notifications not provided via parameter, create it below
      if(-not $FolderForToastNotifications){
-        $partForToastNOtifications = (Split-Path $root -Parent)
+        $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
     }
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
+    
     if($ifUserLoggedInCheck){
         $UserLoggedIn = 'Yes'
     }else{
@@ -671,33 +748,33 @@ Function send-finalToastNotification {
     }
 
      #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
-     try{remove-item "$($root)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}
-     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications", "ToastHeader","UserLoggedIn" | Export-Csv -Path "$($root)\tempFinalInfo.csv" -NoTypeInformation
-     $ImportTempCSVInfo = Import-Csv "$($root)\tempFinalInfo.csv"
+     try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}
+     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications", "ToastHeader","UserLoggedIn" | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
+     $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempFinalInfo.csv"
      $ImportTempCSVInfo.ScriptName = $scriptName
      $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
-     $ImportTempCSVInfo.rootScriptFolder = $root
+     $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
      $ImportTempCSVInfo.UserLoggedIn = $UserLoggedIn
      $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
      $ImportTempCSVInfo.ToastHeader = $Header
-     $ImportTempCSVInfo | Export-Csv -Path "$($root)\tempFinalInfo.csv" -NoTypeInformation
+     $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
      
     
     if ((test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt))  {
     
         #script completed without errors or warning
         
-        send-log -scriptname $scriptname -rootScriptFolder $root -logText "SCRIPT $($ScriptName) COMPLETED SUCCESSFULLY" -addDashes Below 
+        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "SCRIPT $($ScriptName) COMPLETED SUCCESSFULLY" -addDashes Below 
     
-        if ($DattoRMMToastValue -eq 'all'){  #send toast notification per Datto RMM variable
+        if ($ToastNotifications -eq 'all'){  #send toast notification per Datto RMM variable
 
             Invoke-AsCurrentUser {
 
                 $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
-                $root = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
+                $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
                 $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
-                try{remove-item "$($root)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
+                try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($DattoToastNotificationVar -eq 'All'){ #alway push toast notifications
@@ -776,16 +853,16 @@ Function send-finalToastNotification {
     
         send-Log -logText "SCRIPT $($ScriptName) COMPLETED WITH ERRORS" -type Warning   -addDashes Above
     
-        if ($DattoRMMToastValue -eq 'Errors' -or $DattoRMMToastValue -eq 'WarningsErrors' ){
+        if ($ToastNotifications -eq 'Errors' -or $ToastNotifications -eq 'WarningsErrors' ){
     
             Invoke-AsCurrentUser {
                
                 $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
-                $root = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
+                $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
                 $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
 
-                try{remove-item "$($root)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
+                try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($DattoToastNotificationVar -eq 'All' -or $DattoToastNotificationVar -eq 'Errors' -or $DattoToastNotificationVar -eq 'WarningsErrors'){ 
