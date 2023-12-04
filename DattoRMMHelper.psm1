@@ -522,7 +522,7 @@ function send-CustomToastNofication {
         "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
         $WorkingCSVFile = Import-Csv $CSVTAblePath
         $WorkingCSVFile.ToastHeader = $Header
-        $WorkingCSVFile.ToastIdentifierName = $scriptname
+        $WorkingCSVFile.ToastIdentifierName = ($scriptname -replace " ", '')
         $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
         $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
         $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
@@ -750,6 +750,8 @@ Function send-finalToastNotification {
     
         if ($ToastNotifications -eq 'all'){  #send toast notification per Datto RMM variable
 
+            write-host "ToastNotifications Value is ALL" -ForegroundColor Green
+            
             Invoke-AsCurrentUser {
 
                 $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
