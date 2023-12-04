@@ -704,6 +704,13 @@ Function send-finalToastNotification {
      if (-not $ToastNotifications){
         $ToastNotifications = $env:ToastNotifications
     }
+    
+    if (-not $Company){
+        $Company = $env:$ENV:CS_PROFILE_NAME
+    }
+    if (-not $Action){
+        $Action = $env:action
+    }
 
     if ($rootScriptFolder[-1] -like '\'){
 
