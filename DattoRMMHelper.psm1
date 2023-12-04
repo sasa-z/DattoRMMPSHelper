@@ -517,14 +517,17 @@ function send-CustomToastNofication {
     }
 
     #create CSV file if it doesn't exist
-    "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-    $WorkingCSVFile = Import-Csv $CSVTAblePath
-    $WorkingCSVFile.ToastHeader = $Header
-    $WorkingCSVFile.ToastIdentifierName = $scriptname
-    $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
-    $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
-    $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
-    $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+    if (-not (test-path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv")){
+
+        "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        $WorkingCSVFile = Import-Csv $CSVTAblePath
+        $WorkingCSVFile.ToastHeader = $Header
+        $WorkingCSVFile.ToastIdentifierName = $scriptname
+        $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
+        $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
+        $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
+        $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+    }
 
 
     $WorkingCSVFile = Import-Csv $CSVTAblePath 
