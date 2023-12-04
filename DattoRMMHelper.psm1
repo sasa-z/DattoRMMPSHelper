@@ -709,7 +709,7 @@ Function send-finalToastNotification {
         $Company = $ENV:CS_PROFILE_NAME
     }
     if (-not $Action){
-        $Action = $ENV:CS_PROFILE_NAME
+        $Action = $ENV:Action
     }
 
     if ($rootScriptFolder[-1] -like '\'){
