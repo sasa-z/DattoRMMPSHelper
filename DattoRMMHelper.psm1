@@ -717,13 +717,11 @@ Function send-finalToastNotification {
 
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 
-     #if folder for toast notifications not provided via parameter, create it below
-     if(-not $FolderForToastNotifications){
+        #folder for toast notifications not provided via parameter, create it below
         $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
-    }
+  
 
-    write-host "Folder for toast notification files is : " $FolderForToastNotifications
 
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
@@ -769,7 +767,7 @@ Function send-finalToastNotification {
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($ToastNotifications -eq 'All'){ #alway push toast notifications
-                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\Toast_Notification_Files\success.png" -UniqueIdentifier "$scriptname"
+                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\success.png" -UniqueIdentifier "$scriptname"
                    "test" | out-file c:\yw-data\radi.txt
                     }else{
                         "test" | out-file c:\yw-data\radiskipped.txt
@@ -860,7 +858,7 @@ Function send-finalToastNotification {
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($ToastNotifications -eq 'All' -or $DattoToastNotificationVar -eq 'Errors' -or $DattoToastNotificationVar -eq 'WarningsErrors'){ 
-                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED WITH ERRORS/WARNINGS" -AppLogo "$($FolderForToastNotifications)\Toast_Notification_Files\error.png" -UniqueIdentifier "$scriptname"
+                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED WITH ERRORS/WARNINGS" -AppLogo "$($FolderForToastNotifications)\error.png" -UniqueIdentifier "$scriptname"
                    }
                }
        }
