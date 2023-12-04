@@ -46,8 +46,8 @@ function send-Log {
         .PARAMETER addTeamsMessage
             It stores log file we want into a text file that will be used by send-ToastNotification function within this module
         .EXAMPLE
-            send-log -scriptname "Foxit_PDF_Reader" rootScriptFolder "c:\automations" -logText "some text" -type "error" 
-            send-log -scriptname "some script name" rootScriptFolder "c:\automations" -logText "some text" -type "Info" -addDashes "Below" -addTeamsMessage 
+            send-log -scriptname "Foxit_PDF_Reader" rootScriptFolder "c:\automations" -logText "some text" -type error
+            send-log -scriptname "some script name" rootScriptFolder "c:\automations" -logText "some text" -type Info -addDashes "Below" -addTeamsMessage 
         .OUTPUTS
         .NOTES
             FunctionName : 
@@ -126,6 +126,92 @@ function send-Log {
     if($addTeamsMessage.IsPresent){
          $logText | out-file "$rootScriptFolder\$scriptName\Hidden_Files\TeamsMessage.txt" -Force -ErrorAction SilentlyContinue
     }
+}
+
+function get-runAsUserModule {
+
+    [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$rootScriptFolder,
+    [Parameter(Mandatory=$true)]
+    [string]$scriptname
+)
+
+
+if ($rootScriptFolder[-1] -like '\'){
+    $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+}else{
+    $root = $rootScriptFolder
+}
+
+#create script folder if it doesn't exist
+if (-not (test-path "$root\$scriptName")){New-Item -Path "$root" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+
+
+    $RunAsUser = get-module RunAsUser -ListAvailable -ErrorAction stop
+
+    if ($RunAsUser){
+        import-module RunAsUser  
+    }else{
+        try{
+            Install-Module RunAsUser -Force -confirm:$false
+    
+            send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Successfully installed RunAsUser module" -type Info -addDashes Below
+    
+        }catch{
+            send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Failed to install RunAsUser module with error:  $($_.exception.message). Exiting script" -type Error -addDashes Below
+            exit 1            
+        }
+    }
+    
+}
+
+function get-BurntToastModule {
+
+    
+    [CmdletBinding()]
+param(
+    [Parameter(Mandatory=$true)]
+    [string]$rootScriptFolder,
+    [Parameter(Mandatory=$true)]
+    [string]$scriptname
+)
+
+if ($rootScriptFolder[-1] -like '\'){
+    $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+}else{
+    $root = $rootScriptFolder
+}
+
+#create script folder if it doesn't exist
+if (-not (test-path "$root\$scriptName")){New-Item -Path "$root" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+
+
+    $BruntToast = get-module BurntToast -ListAvailable -ErrorAction stop
+if ($BruntToast){
+    try{
+        Import-Module BurntToast -ErrorAction stop
+
+        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Successfully imported BurntToast module"
+        
+    }catch{
+        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Failed to import BurntToast module with error:  $($_.exception.message)" -type Error
+        exit 1
+    }
+    
+}else{
+    try{
+        Install-Module -Name BurntToast -RequiredVersion 0.8.5  -Confirm:$false -Force
+
+        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Successfully installed BurntToast module"
+        
+
+    }catch{
+        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "Failed to install BurntToast module with error:  $($_.exception.message)" -type Error
+
+    }
+}
 }
 
 Function add-ScriptWorkingFoldersAndFiles{
@@ -323,18 +409,19 @@ function send-CustomToastNofication {
             
     )
 
+    
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
     #region toast notification items
-
+    
     #shorten parameter and remove \ if added at the end of the path
     if ($rootScriptFolder[-1] -like '\'){
         $root = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
     }else{
         $root = $rootScriptFolder
-    
+        
     }
-
+    
     #if folder for toast notifications not provided via parameter, create it below
     if(-not $FolderForToastNotifications){
         $partForToastNOtifications = (Split-Path $root -Parent)
