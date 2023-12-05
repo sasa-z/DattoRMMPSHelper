@@ -408,6 +408,7 @@ if (-not $rootScriptFolder){
     $rootScriptFolder = $env:rootScriptFolder
 }
 
+write-host "Root script folder : " $rootscriptfolder
 
 if ($rootScriptFolder[-1] -like '\'){
     $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
