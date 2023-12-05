@@ -1,6 +1,4 @@
 
-
-
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
 # $EnvDattoVariablesValuesHashTable.Add("$($env:ToastNotifications)", "Do you want to show toast notifications?") #change this according to Datto variables
