@@ -1,4 +1,4 @@
-$verbosePreference = 'continue'
+
 
 
 # $EnvDattoVariablesValuesHashTable = @{}
@@ -586,13 +586,7 @@ function send-CustomToastNofication {
         $header = $ToastNotificationHeader}
         Write-Verbose "Header not provided via parameter. Pulling from script or global scope: $($ToastNotificationHeader)"
 
-    Write-Verbose " "
-    write-verbose "Parameter values:"
-    Write-Verbose "Root script folder: $rootScriptFolder"
-    Write-Verbose "Script name: $scriptName"
-    Write-Verbose "Toast notifications: $ToastNotifications"
-    Write-Verbose "Toast notification app logo: $ToastNotificationAppLogo"
-    Write-Verbose "Toast notification header: $header"
+    
     
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
@@ -621,6 +615,14 @@ function send-CustomToastNofication {
         $Folder.Attributes = "Hidden"
         Write-Verbose "Folder for toast notifications created: $($FolderForToastNotifications)"
     }
+
+    Write-Verbose " "
+    write-verbose "Parameter values:"
+    Write-Verbose "Root script folder: $rootScriptFolder"
+    Write-Verbose "Script name: $scriptName"
+    Write-Verbose "Toast notifications: $ToastNotifications"
+    Write-Verbose "Toast notification app logo: $ToastNotificationAppLogo"
+    Write-Verbose "Toast notification header: $header"
 
     #create CSV file if it doesn't exist
     if (-not (test-path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv")){
