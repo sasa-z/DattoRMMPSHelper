@@ -1,4 +1,4 @@
-
+$verbosePreference = 'continue'
 
 
 # $EnvDattoVariablesValuesHashTable = @{}
