@@ -1178,7 +1178,8 @@ function check-softwarePresence{
             #via package
             if ($ExactNametMatch.IsPresent){$softwareName = $SoftwareName}else{$softwareName = "*$SoftwareName*"}  
                
-                $softwareCheck = (Get-Package -ErrorAction stop | Where-Object { $_.Name -like "$SoftwareName" })
+                                $softwareCheck = (Get-Package -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "$SoftwareName" })
+
 
                 if($softwareCheck){
 
