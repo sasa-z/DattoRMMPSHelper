@@ -1,9 +1,5 @@
 
 
-$scriptname = "Google_Chrome"
-$ToastNotifications = 'All'
-$ToastNotificationHeader = "Google Chrome"
-
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
 # $EnvDattoVariablesValuesHashTable.Add("$($env:ToastNotifications)", "Do you want to show toast notifications?") #change this according to Datto variables
@@ -17,11 +13,6 @@ $EnvDattoVariablesValuesHashTable.Add("ToastNotifications", "Do you want to show
 $EnvDattoVariablesValuesHashTable.Add("AppRunning", "What if Chrome  is running?") #change this according to Datto variables
 $EnvDattoVariablesValuesHashTable.Add("NumberOfPCsToPushTo", "How many PCs to run against?") #change this according to Datto variables
 $EnvDattoVariablesValuesHashTable.Add("SendFinalResultToTeams", "Send final script result to Teams channel?") #change this according to Datto variables
-
-
-# $dattoEnvironmentVaribleValue = $env:ToastNotifications #pull from Datto
-$dattoEnvironmentVaribleValue = "all" 
-
 
 
 
