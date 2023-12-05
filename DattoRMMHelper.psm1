@@ -1,8 +1,5 @@
 
 
-$scriptname = "Google_Chrome"
-$ToastNotifications = 'All'
-$ToastNotificationHeader = "Google Chrome"
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
@@ -17,12 +14,6 @@ $EnvDattoVariablesValuesHashTable.Add("ToastNotifications", "Do you want to show
 $EnvDattoVariablesValuesHashTable.Add("AppRunning", "What if Chrome  is running?") #change this according to Datto variables
 $EnvDattoVariablesValuesHashTable.Add("NumberOfPCsToPushTo", "How many PCs to run against?") #change this according to Datto variables
 $EnvDattoVariablesValuesHashTable.Add("SendFinalResultToTeams", "Send final script result to Teams channel?") #change this according to Datto variables
-
-
-# $dattoEnvironmentVaribleValue = $env:ToastNotifications #pull from Datto
-$dattoEnvironmentVaribleValue = "all" 
-
-
 
 
 function send-Log {
@@ -589,6 +580,11 @@ function send-CustomToastNofication {
 
     if (-not $header){$header = $ToastNotificationHeader}
 
+    Write-Verbose "Root script folder: $rootScriptFolder"
+    Write-Verbose "Script name: $scriptName"
+    Write-Verbose "Toast notifications: $ToastNotifications"
+    Write-Verbose "Toast notification app logo: $ToastNotificationAppLogo"
+    Write-Verbose "Toast notification header: $header"
     
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
@@ -640,26 +636,30 @@ function send-CustomToastNofication {
     if ($ifUserLoggedInCheck ){
 
         $WorkingCSVFile | ForEach-Object {$_.ifUserLoggedIn = 'Yes'}
+        Write-Verbose "User is logged in"
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }else{
         $WorkingCSVFile | ForEach-Object {$_.ifUserLoggedIn = 'No'}
+        Write-Verbose "User is not logged in"
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }
    
 
     #Add what type of toast notification and we are sending in CSV and logo to be used
     if ($type -eq 'success'){
-
+        Write-Verbose "Type is success"
         $WorkingCSVFile | ForEach-Object {$_.type = 'Success'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = $ToastNotificationAppLogo}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
        
     }elseif($type -eq 'error'){
+        Write-Verbose "Type is error"
         $WorkingCSVFile | ForEach-Object {$_.type = 'Error'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Error.png'}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
     }elseif ($type -eq 'warning'){
+        Write-Verbose "Type is warning"
         $WorkingCSVFile | ForEach-Object {$_.type = 'Warning'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Warning.png'}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
