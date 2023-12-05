@@ -93,11 +93,11 @@ function send-Log {
     
 
     Write-Verbose "Parameters are:"
-    Write-Verbose "logText is $logText"
-    Write-Verbose "type is $type"
-    Write-Verbose "addDashes is $addDashes"
-    Write-Verbose "addTeamsMessage is $addTeamsMessage"
-    Write-Verbose "scriptname is $scriptname"
+    Write-Verbose "logText is : " $logText
+    Write-Verbose "type is : " $type
+     Write-Verbose "addDashes is : " $addDashes
+    Write-Verbose "addTeamsMessage is: " $addTeamsMessage
+    Write-Verbose "scriptname is :" $scriptname
     Write-Verbose "rootScriptFolder is $rootScriptFolder"
 
     $ErrorLogFile = "$rootScriptFolder\$scriptName\errors.txt"
