@@ -549,7 +549,7 @@ function send-CustomToastNofication {
     [CmdletBinding()]
     param(
 
-        [Parameter(Mandatory=$true)]
+        
         [string]$Header,
         [Parameter(Mandatory=$true)]
         [string]$text,
