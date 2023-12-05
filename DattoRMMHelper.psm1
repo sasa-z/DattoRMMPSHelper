@@ -562,15 +562,17 @@ function send-CustomToastNofication {
             
     )
 
-    Write-Verbose "Function send-CustomToastNofication executed"
+    Write-Verbose "Function send-CustomToastNofication started executing"
 
     if (-not $rootScriptFolder){
         $rootScriptFolder = $env:rootScriptFolder
+        Write-Verbose "Root Script Folder not provided. Pulling from Datto RMM variable: $($rootScriptFolder)"
+
     }
 
     if (-not $ToastNotifications){
-        Write-Verbose "ToastNotifications not provided. Pulling from Datto RMM variable"
         $ToastNotifications = $env:ToastNotifications
+        Write-Verbose "ToastNotifications not provided. Pulling from Datto RMM variable: $($ToastNotifications)"
     }
 
     if ($rootScriptFolder[-1] -like '\'){
@@ -581,9 +583,10 @@ function send-CustomToastNofication {
     }
 
     if (-not $header){
-        Write-Verbose "Header not provided via parameter. Pulling from script or global scope"
         $header = $ToastNotificationHeader}
+        Write-Verbose "Header not provided via parameter. Pulling from script or global scope: $($ToastNotificationHeader)"
 
+    Write-Verbose " "
     write-verbose "Parameter values:"
     Write-Verbose "Root script folder: $rootScriptFolder"
     Write-Verbose "Script name: $scriptName"
@@ -631,10 +634,10 @@ function send-CustomToastNofication {
         $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
         $WorkingCSVFile.DattoRMMValue = $ToastNotifications
         $WorkingCSVFile.ToastText = $text
-        $WorkingCSVFile.ToastHeader = $Header
         $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
         Write-Verbose "CSV file created: $($CSVTAblePath)"
+     
     }
 
 
@@ -657,19 +660,19 @@ function send-CustomToastNofication {
 
     #Add what type of toast notification and we are sending in CSV and logo to be used
     if ($type -eq 'success'){
-        Write-Verbose "Type is success"
+        Write-Verbose "Type is success. Logo is $toastnoficationapplogo"
         $WorkingCSVFile | ForEach-Object {$_.type = 'Success'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = $ToastNotificationAppLogo}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
        
     }elseif($type -eq 'error'){
-        Write-Verbose "Type is error"
+        Write-Verbose "Type is error. Logo is Error.png"
         $WorkingCSVFile | ForEach-Object {$_.type = 'Error'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Error.png'}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
     }elseif ($type -eq 'warning'){
-        Write-Verbose "Type is warning"
+        Write-Verbose "Type is warning. Logo is Warning.png"
         $WorkingCSVFile | ForEach-Object {$_.type = 'Warning'}
         $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Warning.png'}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
