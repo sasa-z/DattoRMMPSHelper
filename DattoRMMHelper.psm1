@@ -75,6 +75,12 @@ function send-Log {
 
         Write-Verbose "rootScriptFolder value pulled from Datto global variable"
     }
+
+      if (-not $scriptname){
+        $scriptname = $scriptname
+
+        Write-Verbose "ScriptName is now: " $scriptname
+    }
     Write-Verbose "Value of rootScriptFolder is $rootScriptFolder"
 
     if ($rootScriptFolder[-1] -like '\'){
