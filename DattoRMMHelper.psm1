@@ -557,8 +557,7 @@ function send-CustomToastNofication {
     [CmdletBinding()]
     param(
 
-        [Parameter(Mandatory=$true)]
-        [string]$Header,
+        [string]$Header = $ToastNotificationHeader,
         [Parameter(Mandatory=$true)]
         [string]$text,
         [ValidateSet('Success', 'Error', 'Warning')]
@@ -663,6 +662,9 @@ function send-CustomToastNofication {
     if ($type -eq 'success'){
 
         $WorkingCSVFile | ForEach-Object {$_.type = 'Success'}
+        $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = $ToastNotificationAppLogo}
+        $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Success.png'}
+
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
        
     }elseif($type -eq 'error'){
@@ -756,7 +758,7 @@ Function send-CustomFinalToastNotification {
             For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
                 rootScriptFolder
                 ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM or in script)
-                SendFinalResultToTeams
+                SendFinalResultToTeams (with 'yes', 'no', 'ifsuccess', 'iferrors' values in Datto RMM )
             You need to provide these variable in script or global scope 
                 scriptName e.g 'Foxit_PDF_Reader'
                 ToastNotificationHeader e.g. 'Foxit PDF Reader'
@@ -866,14 +868,14 @@ Function send-CustomFinalToastNotification {
                 $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
                 $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
+                $FolderForToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty FolderForToastNotifications
+
                 #try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($ToastNotifications -eq 'All'){ #alway push toast notifications
                        New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\success.png" -UniqueIdentifier "$scriptname"
                    "test" | out-file c:\yw-data\radi.txt
-                    }else{
-                        "test" | out-file c:\yw-data\radiskipped.txt
                     }
                }
                
@@ -958,6 +960,8 @@ Function send-CustomFinalToastNotification {
                 $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
                 $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
+                $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
+                $FolderForToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty FolderForToastNotifications
 
                 try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
@@ -1185,7 +1189,8 @@ function check-softwarePresence{
             #via package
             if ($ExactNametMatch.IsPresent){$softwareName = $SoftwareName}else{$softwareName = "*$SoftwareName*"}  
                
-                $softwareCheck = (Get-Package -ErrorAction stop | Where-Object { $_.Name -like "$SoftwareName" })
+                $softwareCheck = Get-Package
+                $softwareCheck = $softwareCheck | Where-Object { $_.Name -like "$SoftwareName" }
 
                 if($softwareCheck){
 
