@@ -2,6 +2,7 @@
 
 $scriptname = "Google_Chrome"
 $ToastNotifications = 'All'
+$ToastNotificationHeader = "Google Chrome"
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
@@ -198,6 +199,97 @@ if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScrip
         }
     }
     
+}
+
+function get-Chocolatey {
+
+    <#
+       .SYNOPSIS
+           Check if Chocolatey is installed
+       .DESCRIPTION
+           Check if Chcoolatey is installed and add information to log file
+           For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+               $scriptName
+               $rootScriptFolder
+       .PARAMETER scriptName
+           It is a script name that we use to create a folder for this script in root scripts working folder
+       .PARAMETER rootScriptFolder
+           It is a root folder for all scripts. E.g. c:\automations. It shold be full path.
+       .EXAMPLE
+           get-chocolatey 
+       .OUTPUTS
+       .NOTES
+           FunctionName : 
+           Created by   : Sasa Zelic
+           Date Coded   : 12/2019
+    #>
+
+   [CmdletBinding()]
+       param(
+           [string]$rootScriptFolder = $rootScriptFolder,
+           [string]$scriptname = $scriptname
+       )
+
+
+       if (-not $rootScriptFolder){
+           $rootScriptFolder = $env:rootScriptFolder
+       }
+
+       if ($rootScriptFolder[-1] -like '\'){
+           $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
+       }else{
+           $rootScriptFolder = $rootScriptFolder
+       }
+
+#create script folder if it doesn't exist
+if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+
+try{
+
+    $ChocoCheck = get-command choco.exe -ErrorAction SilentlyContinue
+
+    if ($ChocoCheck){   
+
+        send-log -logText "Chocolatey is already installed" -addDashes Below
+        
+        $ChocoUpdateNeeded = choco outdated -r | select-string 'chocolatey'
+
+        if ($ChocoUpdateNeeded){
+
+            try{
+                start-process -FilePath choco -ArgumentList "upgrade chocolatey -y" -ErrorAction stop -Wait  | Out-Null
+                send-log -logText "Successfully updated Chocolatey" -addDashes Below
+    
+            }catch{
+                send-log -logText "Failed to update Chocolatey :  $($_.exception.message)" -type Warning
+            }
+
+        }
+
+       
+
+    }else{ #install chocolatey
+        try{
+            Set-ExecutionPolicy Bypass -Scope Process -Force; 
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; 
+            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')) -ErrorAction Stop
+
+            send-log -logText "Successfully installed Chocolatey" -addDashes Below
+        }catch{
+            send-log -logText "Failed to install chocolatey :  $($_.exception.message)" -type Error -addTeamsMessage
+            exit 1
+
+        }
+
+    }
+    
+    }catch{
+        send-log -logText "Failed to install chocolatey :  $($_.exception.message)" -type Error -addTeamsMessage
+        exit 1
+}
+
+
+   
 }
 
 function get-BurntToastModule {
@@ -419,10 +511,15 @@ function send-CustomToastNofication {
             Send Windows Toast Notifications
         .DESCRIPTION
             It sends Toast Notifications so we can track script execution or see script final result
+            
             For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
-                $scriptName
-                $rootScriptFolder
-                $ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM)
+                scriptName
+                rootScriptFolder
+                ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM)
+            
+            These variables needs to be defined in script or global scrope
+                toastNotificationAppLogo e.g. 'Chocolatey.png'
+                ToastNotificationHeader
         .PARAMETER scriptName
             It is a script name that we use to create a folder for this script in root scripts working folder. 
             It is required parameter
@@ -449,7 +546,7 @@ function send-CustomToastNofication {
             This parameter determine where Toast notification files will be stored.
             If not specified, script will use default folder
         .EXAMPLE
-            send-CustomToastNofication -scriptname "Foxit_PDF_Reader" -rootScriptFolder  "c:\automations" -header "Foxit PDF Reader" -text "Installation completed successfully" -type warning -DattoRMMToastValue $DattoToastVar          
+            send-CustomToastNofication -header "Foxit PDF Reader" -text "Installation completed successfully" -type warning 
         .OUTPUTS
         .NOTES
             FunctionName : 
@@ -490,6 +587,9 @@ function send-CustomToastNofication {
         $rootScriptFolder = $rootScriptFolder
         
     }
+
+    if (-not $header){$header = $ToastNotificationHeader}
+
     
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
@@ -646,7 +746,7 @@ function send-CustomToastNofication {
 }
 
 
-Function send-finalToastNotification {
+Function send-CustomFinalToastNotification {
 
      <#
         .SYNOPSIS
@@ -654,9 +754,12 @@ Function send-finalToastNotification {
         .DESCRIPTION
             It sends Toast Notifications so we can track script execution or see script final result
             For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
-                $scriptName
-                $rootScriptFolder
-                $ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM or in script)
+                rootScriptFolder
+                ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM or in script)
+                SendFinalResultToTeams
+            You need to provide these variable in script or global scope 
+                scriptName e.g 'Foxit_PDF_Reader'
+                ToastNotificationHeader e.g. 'Foxit PDF Reader'
         .PARAMETER scriptName
             It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter. 
             It is required parameter
@@ -671,13 +774,12 @@ Function send-finalToastNotification {
             e.g. If none is set in Datto, no toast notifications will be sent etc.
         .PARAMETER Company
             This parameter is piece of information that are sent to teams
-            it is required parameter
         .PARAMETER Action
             This parameter is piece of information that are sent to teams
         .PARAMETER SendToTeams
             This parameter determines if toast notification will be sent to teams
         .EXAMPLE
-            send-CustomToastNofication -scriptname "Foxit_PDF_Reader" -rootScriptFolder  "c:\automations" -header "Foxit PDF Reader" -DattoRMMToastValue $DattoToastVar -company $company -action $Action -SendToTeams $SendToTeams  
+            send-CustomToastNofication -header "Foxit PDF Reader"   
         .OUTPUTS
         .NOTES
             FunctionName : 
@@ -692,7 +794,7 @@ Function send-finalToastNotification {
          [string]$ToastNotifications = $ToastNotifications,
          [string]$Company,
          [string]$Action,
-         [string]$SendToTeams,
+         [switch]$SendToTeams,
          [string]$rootScriptFolder = $rootScriptFolder,    
          [string]$scriptname = $scriptname
 
@@ -707,7 +809,8 @@ Function send-finalToastNotification {
     
     if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
     if (-not $Action){$Action = $ENV:Action}
-    if (-not $SendToTeams){$SendToTeams = $ENV:SendFinalResultToTeams}
+    if (-not $header){$header = $ToastNotificationHeader}
+    $SendFinalResultToTeams = $ENV:SendFinalResultToTeams
 
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
@@ -826,18 +929,20 @@ Function send-finalToastNotification {
       $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
       
       $parameters = @{
-          "URI"         = ""
+          "URI"         = "$env:DattoTeamsChannelWebhookURL"
           "Method"      = 'POST'
           "Body"        = $TeamMessageBody
           "ContentType" = 'application/json'
       }
       
     
-    
-     if ($SendToTeams -eq 'ifsuccess' -or $SendToTeams -eq 'yes'){
-         
-        Invoke-RestMethod @parameters | Out-Null
-     }
+    if ($SendToTeams.IsPresent){ #proceed if we specified we want to send to teams
+
+        if ($SendFinalResultToTeams -eq 'ifsuccess' -or $SendFinalResultToTeams -eq 'yes'){
+            
+           Invoke-RestMethod @parameters | Out-Null
+        }
+    }
     #endregion Send teams notification
     
     
@@ -914,21 +1019,214 @@ $JSONBody = [PSCustomObject][Ordered]@{
       $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
       
       $parameters = @{
-          "URI"         = ""
+          "URI"         = "$env:DattoTeamsChannelWebhookURL"
           "Method"      = 'POST'
           "Body"        = $TeamMessageBody
           "ContentType" = 'application/json'
       }
       
     
-    
-     if ($SendToTeams -eq 'iferrors' -or $SendToTeams -eq 'yes'){
-         
-        Invoke-RestMethod @parameters | Out-Null
-     }
+      if ($SendToTeams.IsPresent){ #proceed if we specified we want to send to teams
+
+            if ($SendFinalResultToTeams -eq 'iferrors' -or $SendFinalResultToTeams -eq 'yes'){
+                
+                Invoke-RestMethod @parameters | Out-Null
+            }
+    }
     #endregion Send teams notification
     
     
     }
     
     }
+
+function distribute-scriptExecution{
+    write-host empty for now
+
+    $NumberOfPCsToPush = $env:NumberOfPCsToPushTo
+
+if($NumberOfPCsToPush -eq '10-50'){
+    # $numberOfSec = Get-Random -Minimum 100 -Maximum 200 
+    # send-Log -logText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-log -logText "Start sleep for $numberOfSec seconds"
+    # prepare-YWToastNotification -ToastNotificationType Success -ToastNotificationText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-YWToastNotification
+    # prepare-YWToastNotification Success -ToastNotificationText "Start sleep for $numberOfSec seconds"
+    # send-YWToastNotification
+    # Start-Sleep $numberOfSec
+
+}elseif($NumberOfPCsToPush -eq '50-100'){
+
+    # $numberOfSec = Get-Random -Minimum 200 -Maximum 400
+    # send-Log -logText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-log -logText "Start sleep for $numberOfSec seconds"
+    # prepare-YWToastNotification -ToastNotificationType Success -ToastNotificationText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-YWToastNotification
+    # prepare-YWToastNotification Success -ToastNotificationText "Start sleep for $numberOfSec seconds"
+    # send-YWToastNotification
+    # Start-Sleep $numberOfSec
+
+}elseif($NumberOfPCsToPush -eq '100-300'){
+    # $numberOfSec = Get-Random -Minimum 400 -Maximum 800
+    # send-Log -logText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-log -logText "Start sleep for $numberOfSec seconds"
+    # prepare-YWToastNotification -ToastNotificationType Success -ToastNotificationText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-YWToastNotification
+    # prepare-YWToastNotification Success -ToastNotificationText "Start sleep for $numberOfSec seconds"
+    # send-YWToastNotification
+    # Start-Sleep $numberOfSec
+}elseif ($NumberOfPCsToPush -eq '300-500') {
+    # $numberOfSec = Get-Random -Minimum 800 -Maximum 1600
+    # send-Log -logText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-log -logText "Start sleep for $numberOfSec seconds"
+    # prepare-YWToastNotification -ToastNotificationType Success -ToastNotificationText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-YWToastNotification
+    # prepare-YWToastNotification Success -ToastNotificationText "Start sleep for $numberOfSec seconds"
+    # send-YWToastNotification
+    # Start-Sleep $numberOfSec
+}elseif($NumberOfPCsToPush -eq '500+'){
+    # $numberOfSec = Get-Random -Minimum 1600 -Maximum 3200
+    # send-Log -logText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-log -logText "Start sleep for $numberOfSec seconds"
+    # prepare-YWToastNotification -ToastNotificationType Success -ToastNotificationText "Thorthling for $NumberOfPCsToPush PCs"
+    # send-YWToastNotification
+    # prepare-YWToastNotification Success -ToastNotificationText "Start sleep for $numberOfSec seconds"
+    # send-YWToastNotification
+    # Start-Sleep $numberOfSec
+}
+}
+
+
+
+function check-softwarePresence{
+
+    <#
+       .SYNOPSIS
+           Check if software is installed
+       .DESCRIPTION
+            Check if software is installed using get-package, registry and chocolatey if specified and return PS object
+            For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
+               $scriptName
+               $rootScriptFolder
+       .PARAMETER scriptName
+            It is a script name that we use to create a folder for this script in root scripts working folder
+       .PARAMETER rootScriptFolder
+            It is a root folder for all scripts. E.g. c:\automations. It shold be full path.
+        .PARAMETER SoftwareName
+            Name of the software. If exactNameMatch is specified, it should be the exact name of the software. Otherwise it should be part of the name.
+       .PARAMETER ExactNametMatch
+            If specified, it will check if exact name of the software is installed
+       .PARAMETER includeChoco
+            If specified, it will check if software is installed via chocolatey
+       .PARAMETER chocolateyName
+            Name of the software in chocolatey. This parameter is required if includeChoco is specified
+       .EXAMPLE
+           check-softwarePresence -softwareName "Google Chrome" -ExactNametMatch
+           check-softwarePresence -softwareName "Google Chrome" -includeChoco -chocolateyName "googlechrome" 
+       .OUTPUTS
+       .NOTES
+           FunctionName : 
+           Created by   : Sasa Zelic
+           Date Coded   : 12/2019
+    #>
+
+   [CmdletBinding()]
+       param(
+           [string]$SoftwareName,
+           [switch]$ExactNametMatch,
+           [switch]$includeChoco,
+           [string]$ChocolateyName,
+           [string]$rootScriptFolder = $rootScriptFolder,
+           [string]$scriptname = $scriptname
+           
+       )
+
+       if (-not $rootScriptFolder){
+            $rootScriptFolder = $env:rootScriptFolder
+        }
+
+    if ($rootScriptFolder[-1] -like '\'){$rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)}else{$rootScriptFolder = $rootScriptFolder}
+
+    #create script folder if it doesn't exist
+    if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+
+
+
+       if ($includeChoco.IsPresent -and $ChocolateyName){
+
+                try{
+
+                
+                    $chocoSoftwareCheck = (choco list) | select-string $ChocolateyName
+                    
+                    if($chocoSoftwareCheck){$VersionViaChoco = $chocoSoftwareCheck.Line.Split(" ")[1]}else{$VersionViaChoco = ""}
+
+                    $UpdateNeededCheckViaChoco = choco outdated -r | select-string $ChocolateyName # switch -r means to limit the output to essential information only
+                
+ 
+                    if($UpdateNeededCheckViaChoco){$UpdatedNeededViaChoco = $true}else{$UpdatedNeededViaChoco = $false}
+                    if($chocoSoftwareCheck){$InstalledViaChoco = $true}else{$InstalledViaChoco = $false}
+
+                }catch{
+                    send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message). Exiting script" -addDashes Below -type Error  
+                    exit 1
+        
+                }
+           
+        }else{
+
+            $VersionViaChoco = ""
+            $UpdatedNeededViaChoco = ""
+            $InstalledViaChoco = ""
+        }
+
+
+        try{
+            #via package
+            if ($ExactNametMatch.IsPresent){$softwareName = $SoftwareName}else{$softwareName = "*$SoftwareName*"}  
+               
+                $softwareCheck = (Get-Package -ErrorAction stop | Where-Object { $_.Name -like "$SoftwareName" })
+
+                if($softwareCheck){
+
+                    $softwareVersion = $softwareCheck.Version
+                    
+                }else{
+                   #check via registry
+
+                   # registry locations where installed software is logged
+                   $pathAllUser = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                   $pathCurrentUser = "Registry::HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                   $pathAllUser32 = "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+                   $pathCurrentUser32 = "Registry::HKEY_CURRENT_USER\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+      
+                   # get all values
+                   $softwareCheck = (Get-ItemProperty -Path $pathAllUser, $pathCurrentUser, $pathAllUser32, $pathCurrentUser32 |
+                       # skip all values w/o displayname
+                       Where-Object DisplayName -ne $null |
+                       # apply user filters submitted via parameter:
+                       Where-Object DisplayName -like $SoftwareName)
+
+                    $softwareVersion = $softwareCheck.displayversion
+
+               }
+
+        }catch{
+            send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message). Exiting script" -addDashes Below -type Error  
+            exit 1
+        }
+
+
+
+$finalResult =  [PSCustomObject]@{
+        Installed = if ($softwareCheck){$true}else{$False}
+        Version =  $softwareVersion
+        InstalledviaChoco = $InstalledViaChoco
+        VersionViaChoco =  $VersionViaChoco
+        UpdatedNeededViaChoco = $UpdatedNeededViaChoco
+        
+      }
+
+      return $finalResult
+   
+}
