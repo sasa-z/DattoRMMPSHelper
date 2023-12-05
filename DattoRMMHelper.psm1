@@ -1,5 +1,5 @@
 
-
+$VerbosePreference = 'continue'
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
