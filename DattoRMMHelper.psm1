@@ -68,6 +68,8 @@ function send-Log {
     Write-Verbose "Executing send-Log function"
     Write-Verbose " --------------------------"
 
+    write-host $scriptname
+
     if (-not $rootScriptFolder){
         $rootScriptFolder = $env:rootScriptFolder
 
