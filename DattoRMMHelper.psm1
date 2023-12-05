@@ -1,5 +1,5 @@
 
-
+$VerbosePreference = 'continue'
 
 # $EnvDattoVariablesValuesHashTable = @{}
 # $EnvDattoVariablesValuesHashTable.Add("$($env:Action)", "What action you want to do?") #change this variable value according to Datto variables in this case, replace Action, and description etc..
@@ -66,7 +66,10 @@ function send-Log {
 
     if (-not $rootScriptFolder){
         $rootScriptFolder = $env:rootScriptFolder
+
+        Write-Verbose "rootScriptFolder value pulled from Datto global variable"
     }
+    Write-Verbose "Value of rootScriptFolder is $rootScriptFolder"
 
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
@@ -76,16 +79,29 @@ function send-Log {
 
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
     if(-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
+    Write-Verbose "Created script folder $scriptFolderLocation"
 
     if(-not (test-path "$scriptFolderLocation\Logs.txt")){New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null } 
     if(-not (test-path "$scriptFolderLocation\Hidden_Files")){New-Item -Path $ScriptFolderLocation -Name "Hidden_Files" -ItemType Directory -Force -ErrorAction Stop | out-null } 
     $Folder = get-item "$($ScriptFolderLocation)\Hidden_Files" -Force
     $Folder.Attributes = "Hidden"
+    Write-Verbose "Created Hidden_Files folder"
+    
 
+    Write-Verbose "Parameters are:"
+    Write-Verbose "logText is $logText"
+    Write-Verbose "type is $type"
+    Write-Verbose "addDashes is $addDashes"
+    Write-Verbose "addTeamsMessage is $addTeamsMessage"
+    Write-Verbose "scriptname is $scriptname"
+    Write-Verbose "rootScriptFolder is $rootScriptFolder"
 
     $ErrorLogFile = "$rootScriptFolder\$scriptName\errors.txt"
+    Write-Verbose "Location for ErrorLogFile is $ErrorLogFile"
     $WarningLogFile = "$rootScriptFolder\$scriptName\warnings.txt"
+    Write-Verbose "Location for WarningLogFile is $WarningLogFile"
     $logFile = "$rootScriptFolder\$scriptName\logs.txt"
+    Write-Verbose "Location for logFile is $logFile"
 
    
  
@@ -114,12 +130,15 @@ function send-Log {
    
     if ($type -eq "Error"){
             Add-Content -Value $logString -Path $ErrorLogFile 
+            Write-Verbose "Added $logString to $ErrorLogFile"
             if(-not $skipWriteHost.IsPresent){write-host $logString}     
     }elseif($type -eq "Warning"){
             Add-Content -Value $logString  -Path $WarningLogFile
+            Write-Verbose "Added $logString to $WarningLogFile"
             if(-not $skipWriteHost.IsPresent){write-host $logString}    
     }else{
             Add-Content -Value $logString -Path $LogFile
+            Write-Verbose "Added $logString to $LogFile"
             if(-not $skipWriteHost.IsPresent){write-host $logString}   
     }
 
@@ -127,6 +146,7 @@ function send-Log {
 
     if($addTeamsMessage.IsPresent){
          $logText | out-file "$rootScriptFolder\$scriptName\Hidden_Files\TeamsMessage.txt" -Force -ErrorAction SilentlyContinue
+         Write-Verbose "Added $logText to $rootScriptFolder\$scriptName\Hidden_Files\TeamsMessage.txt"
     }
 }
 
@@ -169,6 +189,10 @@ function get-runAsUserModule {
         }else{
             $rootScriptFolder = $rootScriptFolder
         }
+
+        Write-Verbose "Parameters are: "
+        Write-Verbose "rootScriptFolder = $rootScriptFolder"
+        Write-Verbose "scriptName = $scriptName"
 
 #create script folder if it doesn't exist
 if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
@@ -415,6 +439,13 @@ if(-not $FolderForToastNotifications){
     $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
 }
 
+Write-Verbose "Parameters are: "
+Write-Verbose "ToastNotificationAppLogo: $ToastNotificationAppLogo"
+Write-Verbose "rootScriptFolder: $rootScriptFolder"
+Write-Verbose "scriptFolderLocation: $scriptFolderLocation"
+Write-Verbose "FolderForToastNotifications: $FolderForToastNotifications"
+Write-Verbose "EnvDattoVariablesValuesHashTable: $EnvDattoVariablesValuesHashTable"
+
 #region create Automate folder and log file in c:\yw-data\ (no values/variables to change)
 try{
     New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
@@ -623,6 +654,9 @@ function send-CustomToastNofication {
     Write-Verbose "Toast notifications: $ToastNotifications"
     Write-Verbose "Toast notification app logo: $ToastNotificationAppLogo"
     Write-Verbose "Toast notification header: $header"
+    Write-Verbose "Toast notification text: $text"
+    Write-Verbose "Toast notification type: $type"
+    Write-Verbose "Folder for toast notifications: $FolderForToastNotifications"
 
     #create CSV file if it doesn't exist
     if (-not (test-path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv")){
@@ -812,9 +846,17 @@ Function send-CustomFinalToastNotification {
     write-host "ToastNotifications value for finalToastlNotification is : " $ToastNotifications
     
     if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
-    if (-not $Action){$Action = $ENV:Action}
-    if (-not $header){$header = $ToastNotificationHeader}
+    if (-not $Action){
+        $Action = $ENV:Action
+        Write-Verbose "Action not provided in parameter. Pulling value from Datto RMM : $($Action)"
+    }
+
+    if (-not $header){
+        Write-Verbose "Header not provided in parameter. Pulling value from Datto RMM : $($Header)"
+        $header = $ToastNotificationHeader
+    }
     $SendFinalResultToTeams = $ENV:SendFinalResultToTeams
+    Write-Verbose "SendFinalResultToTeams value for finalToastlNotification is : " $SendFinalResultToTeams
 
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
@@ -824,19 +866,32 @@ Function send-CustomFinalToastNotification {
 
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 
+    Write-Verbose "scriptFolderLocation value for finalToastlNotification is : " $scriptFolderLocation
+
         #folder for toast notifications not provided via parameter, create it below
         $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
-  
 
+        Write-Verbose "FolderForToastNotifications value for finalToastlNotification is : " $FolderForToastNotifications
+  
+    Write-Verbose "Function parameters are: "
+    Write-Verbose "Header : " $Header
+    Write-Verbose "ToastNotifications : " $ToastNotifications
+    Write-Verbose "Company : " $Company
+    Write-Verbose "Action : " $Action
+    Write-Verbose "SendToTeams : " $SendToTeams
+    Write-Verbose "rootScriptFolder : " $rootScriptFolder
+    Write-Verbose "scriptname : " $scriptname
 
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
     
     if($ifUserLoggedInCheck){
         $UserLoggedIn = 'Yes'
+        Write-Verbose "UserLoggedIn value for finalToastlNotification is : " $UserLoggedIn
     }else{
         $UserLoggedIn = 'No'
+        Write-Verbose "UserLoggedIn value for finalToastlNotification is : " $UserLoggedIn
     }
 
      #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
@@ -856,12 +911,12 @@ Function send-CustomFinalToastNotification {
     if ((test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt))  {
     
         #script completed without errors or warning
-        
+        Write-Verbose "No Errors or Warnings. Script completed successfully"    
         send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "SCRIPT $($ScriptName) COMPLETED SUCCESSFULLY" -addDashes Below 
     
         if ($ToastNotifications -eq 'all'){  #send toast notification per Datto RMM variable
 
-            write-host "ToastNotifications Value is ALL" -ForegroundColor Green
+            Write-Verbose  "ToastNotifications Value is ALL"
 
             Invoke-AsCurrentUser {
 
