@@ -625,6 +625,9 @@ function send-CustomToastNofication {
         $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
         $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
         $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
+        $WorkingCSVFile.DattoRMMValue = $ToastNotifications
+        $WorkingCSVFile.ToastText = $text
+        $WorkingCSVFile.ToastHeader = $Header
         $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }
 
@@ -643,20 +646,6 @@ function send-CustomToastNofication {
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
     }
    
-
-    #add Datto RMM variable value for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.DattoRMMValue = $ToastNotifications}
-    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-    
-     #add text for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.ToastText = $text}
-    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-
-    #add ToastHeader for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.ToastHeader = $Header}
-    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-    
-
 
     #Add what type of toast notification and we are sending in CSV and logo to be used
     if ($type -eq 'success'){
@@ -677,7 +666,7 @@ function send-CustomToastNofication {
     }
    
 
-
+    write-host "app logo " $ToastNotificationAppLogo
     #endregion
 
     #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
@@ -690,6 +679,7 @@ function send-CustomToastNofication {
     $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
     $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
     
+   
     
     Invoke-AsCurrentUser {
 
