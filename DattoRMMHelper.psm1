@@ -1233,3 +1233,48 @@ $finalResult =  [PSCustomObject]@{
       return $finalResult
    
 }
+
+
+function remove-oldToastNotifications{
+
+ <#
+       .SYNOPSIS
+           Remove old toast notifications related to this script
+       .DESCRIPTION
+           Remove old toast notifications related to this script
+               $scriptName
+       .PARAMETER scriptName
+            It is a script name that is used to create uniqueToastNotification
+       .EXAMPLE
+            remove-oldToastNotifications -scriptname $scriptName
+        .OUTPUTS
+       .NOTES
+           FunctionName : 
+           Created by   : Sasa Zelic
+           Date Coded   : 12/2019
+    #>
+
+    [CmdletBinding()]
+    param(
+        [string]$scriptname = $scriptname
+        
+    )
+    
+$ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
+
+[int]$counterUniqueIdentifier = 0
+if($ifUserLoggedInCheck){
+
+    1.15 | ForEach-Object {
+
+        $counterUniqueIdentifier++
+
+        $OldIdentifier = "$scriptName" + '---' + "$counterUniqueIdentifier"
+        
+        Invoke-AsCurrentUser {
+            remove-BTNotification -UniqueIdentifier "$OldIdentifier" -ErrorAction SilentlyContinue
+    
+        }
+    }
+}
+}
