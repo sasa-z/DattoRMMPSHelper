@@ -453,6 +453,8 @@ Write-Verbose "rootScriptFolder: $rootScriptFolder"
 Write-Verbose "scriptFolderLocation: $scriptFolderLocation"
 Write-Verbose "FolderForToastNotifications: $FolderForToastNotifications"
 Write-Verbose "EnvDattoVariablesValuesHashTable: $EnvDattoVariablesValuesHashTable"
+Write-Verbose "scriptName: $scriptName"
+
 
 #region create Automate folder and log file in c:\yw-data\ (no values/variables to change)
 try{
