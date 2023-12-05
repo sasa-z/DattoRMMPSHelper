@@ -496,49 +496,41 @@ try{
 }
 }
 
-function send-CustomToastNofication {
 
-    <#
+Function send-CustomFinalToastNotification {
+
+     <#
         .SYNOPSIS
             Send Windows Toast Notifications
         .DESCRIPTION
             It sends Toast Notifications so we can track script execution or see script final result
-            
             For function to work properly, you need to provide these variables either in script or global scrope or as Datto global variable 
-                scriptName
                 rootScriptFolder
-                ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM)
-            
-            These variables needs to be defined in script or global scrope
-                toastNotificationAppLogo e.g. 'Chocolatey.png'
-                ToastNotificationHeader
+                ToastNotifications (with 'All', 'WarningsErrors', 'Errors', 'None' values in Datto RMM or in script)
+                SendFinalResultToTeams (with 'yes', 'no', 'ifsuccess', 'iferrors' values in Datto RMM )
+            You need to provide these variable in script or global scope 
+                scriptName e.g 'Foxit_PDF_Reader'
+                ToastNotificationHeader e.g. 'Foxit PDF Reader'
         .PARAMETER scriptName
-            It is a script name that we use to create a folder for this script in root scripts working folder. 
+            It is a script name that we use to create a folder for this script in root scripts working folder and it is required parameter. 
             It is required parameter
         .PARAMETER rootScriptFolder
             This paramter is required. It is a root folder for all scripts. E.g. c:\automations. It shold be full path. 
-        .PARAMETER text
-            This parameter is used to set text in toast notification
             It is required parameter
-        .PARAMETER type
-            It is notification type. Depending on the type, different toast notification logo will be used. We upload logo to Datto component and copy to local workstation
-            If not provided, default toast notification logo will be used 'success.png'
-            Values are Success, Error, Warning
         .PARAMETER header
             This parameter is used to set header in toast notification
-            it is required parameter
         .PARAMETER ToastNotifications
             This parameter is used to determine when and what Toast nofications will be sent. We pull this from Datto RMM variable
             Datto variable Values are All, WarningsErrors, Errors, None 
             e.g. If none is set in Datto, no toast notifications will be sent etc.
-        .PARAMETER header
-            This parameter is used to set header in toast notification
-            it is required parameter
-        .PARAMETER FolderForToastNotifications
-            This parameter determine where Toast notification files will be stored.
-            If not specified, script will use default folder
+        .PARAMETER Company
+            This parameter is piece of information that are sent to teams
+        .PARAMETER Action
+            This parameter is piece of information that are sent to teams
+        .PARAMETER SendToTeams
+            This parameter determines if toast notification will be sent to teams
         .EXAMPLE
-            send-CustomToastNofication -header "Foxit PDF Reader" -text "Installation completed successfully" -type warning 
+            send-CustomToastNofication -header "Foxit PDF Reader"   
         .OUTPUTS
         .NOTES
             FunctionName : 
@@ -546,198 +538,260 @@ function send-CustomToastNofication {
             Date Coded   : 12/2019
      #>
     
-    [CmdletBinding()]
-    param(
+     [CmdletBinding()]
+     param(
+         [string]$Header,
+         [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
+         [string]$ToastNotifications = $ToastNotifications,
+         [string]$Company,
+         [string]$Action,
+         [switch]$SendToTeams,
+         [string]$rootScriptFolder = $rootScriptFolder,    
+         [string]$scriptname = $scriptname
 
-        
-          [string]$Header = $ToastNotificationHeader,
-        [Parameter(Mandatory=$true)]
-        [string]$text,
-        [ValidateSet('Success', 'Error', 'Warning')]
-        [string]$type = "Success",
-        [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
-        [string]$ToastNotifications = $ToastNotifications,
-        [string]$ToastNotificationAppLogo = $ToastNotificationAppLogo,
-        [string]$FolderForToastNotifications,
-        [string]$scriptname = $scriptname,
-        [string]$rootScriptFolder = $rootScriptFolder
-            
-    )
-
-
-    if (-not $rootScriptFolder){
-        $rootScriptFolder = $env:rootScriptFolder
-    }
-
-    if (-not $ToastNotifications){
+             
+     )
+ 
+     if (-not $ToastNotifications){
         $ToastNotifications = $env:ToastNotifications
     }
+
+    write-host "ToastNotifications value for finalToastlNotification is : " $ToastNotifications
+    
+    if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
+    if (-not $Action){$Action = $ENV:Action}
+    if (-not $header){$header = $ToastNotificationHeader}
+    $SendFinalResultToTeams = $ENV:SendFinalResultToTeams
 
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
     }else{
-        $rootScriptFolder = $rootScriptFolder
-        
+        $rootScriptFolder = $rootScriptFolder 
     }
 
-    if (-not $header){$header = $ToastNotificationHeader}
-
-    
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
-    $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
-    #region toast notification items
-    
-    
-    #if folder for toast notifications not provided via parameter, create it below
-    if(-not $FolderForToastNotifications){
+
+        #folder for toast notifications not provided via parameter, create it below
         $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
-    }
-
-    #create hidden folder if it doesn't exist in script folder location
-    if(-not (Test-Path -Path "$($ScriptFolderLocation)\Hidden_Files")){
-        New-Item -Path $ScriptFolderLocation -Name 'Hidden_Files' -ItemType Directory -Force -ErrorAction Stop | out-null
-        $Folder = get-item "$($ScriptFolderLocation)\Hidden_Files" -Force
-        $Folder.Attributes = "Hidden"
-    }
+  
 
 
-    if (-not (Test-Path -Path $FolderForToastNotifications)){
-        New-Item -Path (Split-Path $FolderForToastNotifications -Parent) -Name (Split-Path $FolderForToastNotifications -Leaf) -ItemType Directory -Force -ErrorAction Stop | out-null
-        $Folder = get-item "$FolderForToastNotifications" -Force
-        $Folder.Attributes = "Hidden"
-    }
-
-    #create CSV file if it doesn't exist
-    if (-not (test-path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv")){
-
-        "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-        $WorkingCSVFile = Import-Csv $CSVTAblePath
-        $WorkingCSVFile.ToastHeader = $Header
-        $WorkingCSVFile.ToastIdentifierName = ($scriptname -replace " ", '')
-        $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
-        $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
-        $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
-        $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-    }
-
-
-    $WorkingCSVFile = Import-Csv $CSVTAblePath 
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
-
-    #add info if user is logged in
-    if ($ifUserLoggedInCheck ){
-
-        $WorkingCSVFile | ForEach-Object {$_.ifUserLoggedIn = 'Yes'}
-        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+    
+    if($ifUserLoggedInCheck){
+        $UserLoggedIn = 'Yes'
     }else{
-        $WorkingCSVFile | ForEach-Object {$_.ifUserLoggedIn = 'No'}
-        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+        $UserLoggedIn = 'No'
     }
-   
 
-    #add Datto RMM variable value for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.DattoRMMValue = $ToastNotifications}
-    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+     #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
+     try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}
+     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","ToastNotifications","FolderForToastNotifications", "ToastHeader","UserLoggedIn" | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
+     $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempFinalInfo.csv"
+     $ImportTempCSVInfo.ScriptName = $scriptName
+     $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
+     $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
+     $ImportTempCSVInfo.UserLoggedIn = $UserLoggedIn
+     $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
+     $ImportTempCSVInfo.ToastHeader = $Header
+     $ImportTempCSVInfo.ToastNotifications = $ToastNotifications
+     $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
+     
     
-     #add text for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.ToastText = $text}
-    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-
-    #add ToastHeader for ToastNotifications in CSV
-    $WorkingCSVFile | ForEach-Object {$_.ToastHeader = $Header}
-    $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+    if ((test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt))  {
     
-
-
-    #Add what type of toast notification and we are sending in CSV and logo to be used
-    if ($type -eq 'success'){
-
-        $WorkingCSVFile | ForEach-Object {$_.type = 'Success'}
-               $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = $ToastNotificationAppLogo}
-
-        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-       
-    }elseif($type -eq 'error'){
-        $WorkingCSVFile | ForEach-Object {$_.type = 'Error'}
-        $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Error.png'}
-        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-
-    }elseif ($type -eq 'warning'){
-        $WorkingCSVFile | ForEach-Object {$_.type = 'Warning'}
-        $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'Warning.png'}
-        $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-    }
-   
-
-
-    #endregion
-
-    #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
-    try{remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
-    "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","FolderForToastNotifications" | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
-    $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempInfo.csv"
-    $ImportTempCSVInfo.ScriptName = $scriptName
-    $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
-    $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
-    $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
-    $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempInfo.csv" -NoTypeInformation
-    
-    
-    Invoke-AsCurrentUser {
-
-        $ScriptName = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptName
-        $rootScriptFolder = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty rootScriptFolder
-        $ScriptFolderLocation = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty ScriptFolderLocation
-        $FolderForToastNotifications = import-csv c:\yw-data\automate\tempInfo.csv | select-object -expandproperty FolderForToastNotifications
-        try{remove-item "$($rootScriptFolder)\tempInfo.csv" -ErrorAction SilentlyContinue}catch{}
-
+        #script completed without errors or warning
         
-        $CSVTAblePath = "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv"
+        send-log -scriptname $scriptname -rootScriptFolder $rootScriptFolder -logText "SCRIPT $($ScriptName) COMPLETED SUCCESSFULLY" -addDashes Below 
+    
+        if ($ToastNotifications -eq 'all'){  #send toast notification per Datto RMM variable
 
-        $WorkingCSVFile = Import-Csv  $CSVTAblePath
+            write-host "ToastNotifications Value is ALL" -ForegroundColor Green
+
+            Invoke-AsCurrentUser {
+
+                $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
+                $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
+                $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
+                $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
+                $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
+                $FolderForToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty FolderForToastNotifications
+
+                #try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
        
-        #get values from CSV
-        [int]$UniqueIdentifierNumber = ($WorkingCSVFile.UniqueIdentifier -split '---' | select-object -last 1)
-        $ToastHeader = $WorkingCSVFile.ToastHeader 
-        $ToastText = $WorkingCSVFile.ToastText 
-        $toastAppLogo = $WorkingCSVFile.ToastAppLogo 
-        $toastIdentifierName = $WorkingCSVFile.ToastIdentifierName
-        $toastType = $WorkingCSVFile.type
-        $toastIdentifier = $toastIdentifierName + '---' + $UniqueIdentifierNumber
-        $DattoToastNotificationVar = $WorkingCSVFile.DattoRMMValue
-        $userIsLoggedIn = $WorkingCSVFile.ifUserLoggedIn
-
-        write-host "Toast identifier: $($toastIdentifier)" -ForegroundColor Yellow
-
-
-        #increase unique identifier number so the new notification doesn't overwrite previous one
-        $Increase = $UniqueIdentifierNumber + 1
-        $newToastIdentifier = $toastIdentifierName + '---' + $Increase
-        $WorkingCSVFile | foreach-object {
-            $_.UniqueIdentifier = $newToastIdentifier
+               if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
+                   if ($ToastNotifications -eq 'All'){ #alway push toast notifications
+                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\success.png" -UniqueIdentifier "$scriptname"
+                   "test" | out-file c:\yw-data\radi.txt
+                    }
+               }
+               
+       
+           }
         }
-        $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
-
-        write-host "Toast identifier: $($newToastIdentifier)" -ForegroundColor Yellow
         
-        if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
-            #handle when and if Toast notification will be pushed depending on what was selected in Datto and what type of notification in script (success, error or warning)
-            if ($DattoToastNotificationVar -eq 'All'){ #alway push toast notifications
-                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "$FolderForToastNotifications\$ToastAppLogo" -UniqueIdentifier "$toastIdentifier"
-            }elseif ($DattoToastNotificationVar -eq 'Errors' -and ($toastType -eq 'Error')){ #only push toast notifications with errors        
-                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "c:\yw-data\Toast_Notification_Files\$($ToastAppLogo)" -UniqueIdentifier "$toastIdentifier"                           
-            }elseif($DattoToastNotificationVar -eq 'WarningsErrors' -and ($toastType -eq 'Error' -or $toastType -eq 'Warning')){ #only push toast notifications with errors or warnings     
-                New-BurntToastNotification -Text "$($ToastHeader)","$($ToastText)" -AppLogo "c:\yw-data\Toast_Notification_Files\$($ToastAppLogo)" -UniqueIdentifier "$toastIdentifier"                
+    
+      #region Send teams notification
+    
+    $teamsMessageFile = get-content $ScriptFolderLocation\Hidden_Files\TeamsMessage.txt
+     
+    $JSONBody = [PSCustomObject][Ordered]@{
+        "@type"      = "MessageCard"
+        "@context"   = "http://schema.org/extensions"
+        "summary"    = "$($ScriptName) - $env:computername"
+        "themeColor" = '0078D7'
+        "sections"   = @(
+              @{
+                  
+             
+                      
+              "facts"            = @(
+    
+                        @{
+                            "name"  = ""
+                            "value" = "<strong style='color:#70B26C;'>$($env:COMPUTERNAME)</strong>"
+                        },
+                        @{
+                            "name"  = ""
+                            "value" = "<strong style='color:#2BB557;'>$($teamsMessageFile)</strong>"
+                          },
+                          @{
+                            "name"  = ""
+                            "value" = "<strong style='color:#3192E3;'>$($ScriptName)</strong>"
+                          },
+                        @{
+                              "name"  = "Company:"
+                              "value" = "$($Company)"
+                            },
+    
+                        @{
+                            "name"  = "Action:"
+                            "value" = "$($action)"
+                            }
+                      )
+    
+                      "markdown" = $true
+                  }
+        )
+      }
+      
+      $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
+      
+      $parameters = @{
+          "URI"         = "$env:DattoTeamsChannelWebhookURL"
+          "Method"      = 'POST'
+          "Body"        = $TeamMessageBody
+          "ContentType" = 'application/json'
+      }
+      
+    
+    if ($SendToTeams.IsPresent){ #proceed if we specified we want to send to teams
+
+        if ($SendFinalResultToTeams -eq 'ifsuccess' -or $SendFinalResultToTeams -eq 'yes'){
+            
+           Invoke-RestMethod @parameters | Out-Null
+        }
+    }
+    #endregion Send teams notification
+    
+    
+    }else{
+    
+        send-Log -logText "SCRIPT $($ScriptName) COMPLETED WITH ERRORS" -type Warning   -addDashes Above
+    
+        if ($ToastNotifications -eq 'Errors' -or $ToastNotifications -eq 'WarningsErrors' ){
+    
+            Invoke-AsCurrentUser {
+               
+                $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
+                $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
+                $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
+                $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
+                $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
+                $FolderForToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty FolderForToastNotifications
+
+                try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}    
+       
+               if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
+                   if ($ToastNotifications -eq 'All' -or $DattoToastNotificationVar -eq 'Errors' -or $DattoToastNotificationVar -eq 'WarningsErrors'){ 
+                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED WITH ERRORS/WARNINGS" -AppLogo "$($FolderForToastNotifications)\error.png" -UniqueIdentifier "$scriptname"
+                   }
+               }
+       }
+       
+        }
+      
+     #region Send teams notification
+     $teamsMessageFile = get-content $ScriptFolderLocation\Hidden_Files\TeamsMessage.txt
+     
+ 
+   
+$JSONBody = [PSCustomObject][Ordered]@{
+    "@type"      = "MessageCard"
+    "@context"   = "http://schema.org/extensions"
+    "summary"    = "$($ScriptName) - $env:computername"
+    "themeColor" = '0078D7'
+    "sections"   = @(
+          @{
+         
+                  
+            "facts"            = @(
+
+            @{
+                "name"  = ""
+                "value" = "<strong style='color:#70B26C;'>$($env:COMPUTERNAME)</strong>"
+            },
+            @{
+                "name"  = ""
+                "value" = "<strong style='color:#D2395A;'>$($teamsMessageFile)</strong>"
+              },
+              @{
+                "name"  = ""
+                "value" = "<strong style='color:#3192E3;'>$($ScriptName)</strong>"
+              },
+            @{
+                  "name"  = "Company:"
+                  "value" = "$($Company)"
+                },
+
+            @{
+                "name"  = "Action:"
+                "value" = "$($action)"
+                }
+          )
+          
+
+
+                  "markdown" = $true
+              }
+    )
+  }
+      
+      $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
+      
+      $parameters = @{
+          "URI"         = "$env:DattoTeamsChannelWebhookURL"
+          "Method"      = 'POST'
+          "Body"        = $TeamMessageBody
+          "ContentType" = 'application/json'
+      }
+      
+    
+      if ($SendToTeams.IsPresent){ #proceed if we specified we want to send to teams
+
+            if ($SendFinalResultToTeams -eq 'iferrors' -or $SendFinalResultToTeams -eq 'yes'){
+                
+                Invoke-RestMethod @parameters | Out-Null
             }
-        }
-        
-
     }
-
-
-}
+    #endregion Send teams notification
+    
+    
+    }
+    
+    }
 
 
 Function send-CustomFinalToastNotification {
