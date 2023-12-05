@@ -864,6 +864,8 @@ Function send-CustomFinalToastNotification {
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($ToastNotifications -eq 'All'){ #alway push toast notifications
+
+                   write-host "$($FolderForToastNotifications)\success.png"
                        New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\success.png" -UniqueIdentifier "$scriptname"
                    "test" | out-file c:\yw-data\radi.txt
                     }else{
