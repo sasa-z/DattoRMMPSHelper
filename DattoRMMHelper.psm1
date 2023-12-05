@@ -550,7 +550,7 @@ function send-CustomToastNofication {
     param(
 
         
-        [string]$Header,
+          [string]$Header = $ToastNotificationHeader,
         [Parameter(Mandatory=$true)]
         [string]$text,
         [ValidateSet('Success', 'Error', 'Warning')]
