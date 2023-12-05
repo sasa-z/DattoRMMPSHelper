@@ -655,6 +655,7 @@ function send-CustomToastNofication {
     if ($type -eq 'success'){
 
         $WorkingCSVFile | ForEach-Object {$_.type = 'Success'}
+        $WorkingCSVFile | ForEach-Object {$_.ToastAppLogo = 'success.png'}
         $WorkingCSVFile | export-csv -path  $CSVTAblePath -NoTypeInformation -ErrorAction Stop
        
     }elseif($type -eq 'error'){
