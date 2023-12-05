@@ -562,12 +562,14 @@ function send-CustomToastNofication {
             
     )
 
+    Write-Verbose "Function send-CustomToastNofication executed"
 
     if (-not $rootScriptFolder){
         $rootScriptFolder = $env:rootScriptFolder
     }
 
     if (-not $ToastNotifications){
+        Write-Verbose "ToastNotifications not provided. Pulling from Datto RMM variable"
         $ToastNotifications = $env:ToastNotifications
     }
 
@@ -578,8 +580,11 @@ function send-CustomToastNofication {
         
     }
 
-    if (-not $header){$header = $ToastNotificationHeader}
+    if (-not $header){
+        Write-Verbose "Header not provided via parameter. Pulling from script or global scope"
+        $header = $ToastNotificationHeader}
 
+    write-verbose "Parameter values:"
     Write-Verbose "Root script folder: $rootScriptFolder"
     Write-Verbose "Script name: $scriptName"
     Write-Verbose "Toast notifications: $ToastNotifications"
@@ -595,6 +600,7 @@ function send-CustomToastNofication {
     if(-not $FolderForToastNotifications){
         $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
+        Write-Verbose "Folder for toast notifications: $FolderForToastNotifications"
     }
 
     #create hidden folder if it doesn't exist in script folder location
@@ -602,6 +608,7 @@ function send-CustomToastNofication {
         New-Item -Path $ScriptFolderLocation -Name 'Hidden_Files' -ItemType Directory -Force -ErrorAction Stop | out-null
         $Folder = get-item "$($ScriptFolderLocation)\Hidden_Files" -Force
         $Folder.Attributes = "Hidden"
+        Write-Verbose "Folder for toast notifications created: HIdden_Files in $($scriptFolderLocation)"
     }
 
 
@@ -609,6 +616,7 @@ function send-CustomToastNofication {
         New-Item -Path (Split-Path $FolderForToastNotifications -Parent) -Name (Split-Path $FolderForToastNotifications -Leaf) -ItemType Directory -Force -ErrorAction Stop | out-null
         $Folder = get-item "$FolderForToastNotifications" -Force
         $Folder.Attributes = "Hidden"
+        Write-Verbose "Folder for toast notifications created: $($FolderForToastNotifications)"
     }
 
     #create CSV file if it doesn't exist
@@ -625,6 +633,8 @@ function send-CustomToastNofication {
         $WorkingCSVFile.ToastText = $text
         $WorkingCSVFile.ToastHeader = $Header
         $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+
+        Write-Verbose "CSV file created: $($CSVTAblePath)"
     }
 
 
@@ -666,7 +676,6 @@ function send-CustomToastNofication {
     }
    
 
-    write-host "app logo " $ToastNotificationAppLogo
     #endregion
 
     #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
