@@ -726,7 +726,7 @@ function send-CustomToastNofication {
         }
         $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
-        Add-Content -Value $toastAppLogo -Path "$FolderForToastNotifications\$ToastAppLogo"
+        Add-Content -Value $toastAppLogo -Path "$FolderForToastNotifications\1.txt"
         
         if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
             #handle when and if Toast notification will be pushed depending on what was selected in Datto and what type of notification in script (success, error or warning)
