@@ -1,5 +1,5 @@
 
-
+$VerbosePreference = 'continue'
 
 
 # $EnvDattoVariablesValuesHashTable = @{}
@@ -93,11 +93,11 @@ function send-Log {
     
 
     Write-Verbose "Parameters are:"
-    Write-Verbose "logText is : " $logText
-    Write-Verbose "type is : " $type
-     Write-Verbose "addDashes is : " $addDashes
-    Write-Verbose "addTeamsMessage is: " $addTeamsMessage
-    Write-Verbose "scriptname is :" $scriptname
+    Write-Verbose "logText is : $logText " 
+    Write-Verbose "type is : $type " 
+     Write-Verbose "addDashes is :  $addDashes "
+    Write-Verbose "addTeamsMessage is:  $addTeamsMessage "
+    Write-Verbose "scriptname is : $scriptname " 
     Write-Verbose "rootScriptFolder is $rootScriptFolder"
 
     $ErrorLogFile = "$rootScriptFolder\$scriptName\errors.txt"
@@ -466,8 +466,8 @@ try{
     }
     
     New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
-    Write-Verbose "Created scriptname folder: " $rootScriptFolder\$scriptName
-    
+    Write-Verbose "Created scriptname folder:  $rootScriptFolder\$scriptName "
+
     New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null
 
     #create hidden folder to copy files for toast notifications
@@ -874,11 +874,11 @@ Function send-CustomFinalToastNotification {
     }
 
     if (-not $header){
-        Write-Verbose "Header not provided in parameter. Pulling value from Datto RMM : $($Header)"
+        Write-Verbose "Header not provided in parameter. Pulling value from script scope : $($ToastNotificationHeader)"
         $header = $ToastNotificationHeader
     }
     $SendFinalResultToTeams = $ENV:SendFinalResultToTeams
-    Write-Verbose "SendFinalResultToTeams value for finalToastlNotification is : " $SendFinalResultToTeams
+    Write-Verbose "SendFinalResultToTeams value for finalToastlNotification is :  $SendFinalResultToTeams "
 
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
@@ -888,32 +888,32 @@ Function send-CustomFinalToastNotification {
 
     $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 
-    Write-Verbose "scriptFolderLocation value for finalToastlNotification is : " $scriptFolderLocation
+    Write-Verbose "scriptFolderLocation value for finalToastlNotification is :  $scriptFolderLocation "
 
         #folder for toast notifications not provided via parameter, create it below
         $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
         $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
 
-        Write-Verbose "FolderForToastNotifications value for finalToastlNotification is : " $FolderForToastNotifications
+        Write-Verbose "FolderForToastNotifications value for finalToastlNotification is :  $FolderForToastNotifications "
   
     Write-Verbose "Function parameters are: "
-    Write-Verbose "Header : " $Header
-    Write-Verbose "ToastNotifications : " $ToastNotifications
-    Write-Verbose "Company : " $Company
-    Write-Verbose "Action : " $Action
-    Write-Verbose "SendToTeams : " $SendToTeams
-    Write-Verbose "rootScriptFolder : " $rootScriptFolder
-    Write-Verbose "scriptname : " $scriptname
+    Write-Verbose "Header :  $Header "
+    Write-Verbose "ToastNotifications :  $ToastNotifications "
+    Write-Verbose "Company :  $Company "
+    Write-Verbose "Action :  $Action "
+    Write-Verbose "SendToTeams :  $SendToTeams "
+    Write-Verbose "rootScriptFolder :  $rootScriptFolder "
+    Write-Verbose "scriptname :  $scriptname "
 
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
     
     if($ifUserLoggedInCheck){
         $UserLoggedIn = 'Yes'
-        Write-Verbose "UserLoggedIn value for finalToastlNotification is : " $UserLoggedIn
+        Write-Verbose "UserLoggedIn value for finalToastlNotification is :  $UserLoggedIn "
     }else{
         $UserLoggedIn = 'No'
-        Write-Verbose "UserLoggedIn value for finalToastlNotification is : " $UserLoggedIn
+        Write-Verbose "UserLoggedIn value for finalToastlNotification is :  $UserLoggedIn "
     }
 
      #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
