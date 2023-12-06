@@ -2,15 +2,14 @@
 
 function store {
 
-[cmdletbinding()]
-param(
+    [cmdletbinding()]
+    param(
+        
+        [string]$variableName = $globalsometing
+    )
     
-    [string]$variableName = $globalsometing
-)
-
-write-host $variableName
-
-
+    write-host $variableName
+    write-host "testing"
+    
+    
 }
-
-
