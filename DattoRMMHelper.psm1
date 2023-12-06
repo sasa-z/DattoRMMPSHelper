@@ -213,7 +213,7 @@ if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScrip
             send-log  -logText "Successfully installed RunAsUser module" -type Info -addDashes Below
     
         }catch{
-            send-log  -logText "Failed to install RunAsUser module with error:  $($_.exception.message). Exiting script" -type Error -addDashes Below
+            send-log  -logText "Failed to install RunAsUser module with error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber). Exiting script" -type Error -addDashes Below
             exit 1            
         }
     }
@@ -280,7 +280,7 @@ try{
                 send-log -logText "Successfully updated Chocolatey" -addDashes Below
     
             }catch{
-                send-log -logText "Failed to update Chocolatey :  $($_.exception.message)" -type Warning
+                send-log -logText "Failed to update Chocolatey :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning
             }
 
         }
@@ -295,7 +295,7 @@ try{
 
             send-log -logText "Successfully installed Chocolatey" -addDashes Below
         }catch{
-            send-log -logText "Failed to install chocolatey :  $($_.exception.message)" -type Error -addTeamsMessage
+            send-log -logText "Failed to install chocolatey :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Error -addTeamsMessage
             exit 1
 
         }
@@ -303,7 +303,7 @@ try{
     }
     
     }catch{
-        send-log -logText "Failed to install chocolatey :  $($_.exception.message)" -type Error -addTeamsMessage
+        send-log -logText "Failed to install chocolatey :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Error -addTeamsMessage
         exit 1
 }
 
@@ -363,7 +363,7 @@ if ($BruntToast){
         send-log -logText "Successfully imported BurntToast module"
         
     }catch{
-        send-log -logText "Failed to import BurntToast module with error:  $($_.exception.message)" -type Warning
+        send-log -logText "Failed to import BurntToast module with error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning
         
     }
     
@@ -375,7 +375,7 @@ if ($BruntToast){
         
 
     }catch{
-        send-log -logText "Failed to install BurntToast module with error:  $($_.exception.message)" -type Warning
+        send-log -logText "Failed to install BurntToast module with error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning
 
     }
 }
@@ -492,7 +492,7 @@ try{
         #endregion ToastNotification files
 
     }catch{
-        send-Log -logText "Failed to create "$FolderForToastNotifications" folder. Error:  $($_.exception.message)" -type Error
+        send-Log -logText "Failed to create "$FolderForToastNotifications" folder. Error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber) " -type Error
     
     }
    
@@ -512,7 +512,7 @@ try{
     }
         copy-item Chocolatey.png -Destination "$($FolderForToastNotifications)\Chocolatey.png" -Force -ErrorAction SilentlyContinue
     }catch{
-        send-Log -logText "Failed to copy Toast Notification logos :  $($_.exception.message)" -type Warning 
+        send-Log -logText "Failed to copy Toast Notification logos :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning 
     }
     
    
@@ -534,7 +534,7 @@ try{
 
 
 }catch{
-    send-Log -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message)" -type Error -addDashes Below 
+    send-Log -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Error -addDashes Below 
 
     exit 1
 }
@@ -1251,7 +1251,7 @@ function check-softwarePresence{
                     if($chocoSoftwareCheck){$InstalledViaChoco = $true}else{$InstalledViaChoco = $false}
 
                 }catch{
-                    send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message). Exiting script" -addDashes Below -type Error  
+                    send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber). Exiting script" -addDashes Below -type Error  
                     exit 1
         
                 }
@@ -1296,7 +1296,7 @@ function check-softwarePresence{
                }
 
         }catch{
-            send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message). Exiting script" -addDashes Below -type Error  
+            send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber). Exiting script" -addDashes Below -type Error  
             exit 1
         }
 
