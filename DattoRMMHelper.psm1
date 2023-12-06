@@ -60,6 +60,7 @@ function send-Log {
         [string]$addDashes,
         [switch]$addTeamsMessage,
         [switch]$skipWriteHost,
+        [switch]$catch,
         [string]$scriptname = $scriptname,
         [string]$rootScriptFolder = $rootScriptFolder
 
@@ -110,6 +111,10 @@ function send-Log {
    
  
     $DateStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    
+        if ($catch.IsPresent){
+            $logString = "$logtext. Error: $($_.exception.message), at line $($_.InvocationInfo.ScriptLineNumber)"
+        }
 
     if ($addDashes -eq "Above"){
         if($type -eq "Error"){
