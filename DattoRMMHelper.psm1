@@ -1,5 +1,5 @@
 
-$VerbosePreference = 'continue'
+
 
 
 # $EnvDattoVariablesValuesHashTable = @{}
