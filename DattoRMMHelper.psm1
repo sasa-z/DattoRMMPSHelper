@@ -461,7 +461,7 @@ try{
     
     #remove previous folder is exists
     if (test-path "$rootScriptFolder\$scriptName"){
-        Write-Verbose "Removing previous folder: " $rootScriptFolder\$scriptName
+        Write-Verbose "Removing previous folder:  $rootScriptFolder\$scriptName "
         Remove-Item -Path "$rootScriptFolder\$scriptName\" -Recurse -Force
     }
     
