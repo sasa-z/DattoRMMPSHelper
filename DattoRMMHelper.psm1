@@ -845,7 +845,7 @@ Function send-CustomFinalToastNotification {
     
      [CmdletBinding()]
      param(
-         [string]$Header,
+         [string]$Header = $ToastNotificationHeader,
          [ValidateSet('All', 'WarningsErrors', 'Errors', 'None')]
          [string]$ToastNotifications = $ToastNotifications,
          [string]$Company,
@@ -880,6 +880,12 @@ Function send-CustomFinalToastNotification {
     $SendFinalResultToTeams = $ENV:SendFinalResultToTeams
     Write-Verbose "SendFinalResultToTeams value for finalToastlNotification is :  $SendFinalResultToTeams "
 
+    if (-not $rootScriptFolder){
+        $rootScriptFolder = $env:rootScriptFolder
+        Write-Verbose "Root Script Folder not provided. Pulling from Datto RMM variable: $($rootScriptFolder)"
+
+    }
+    
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
     }else{
