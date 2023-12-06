@@ -667,7 +667,11 @@ function send-CustomToastNofication {
     #create CSV file if it doesn't exist
     if (-not (test-path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv")){
 
+    Write-Verbose "Creating CSV file: $($CSVTAblePath)"
+
         "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
+        
+    }
         $WorkingCSVFile = Import-Csv $CSVTAblePath
         $WorkingCSVFile.ToastHeader = $Header
         $WorkingCSVFile.ToastIdentifierName = ($scriptname -replace " ", '')
@@ -680,7 +684,7 @@ function send-CustomToastNofication {
 
         Write-Verbose "CSV file created: $($CSVTAblePath)"
      
-    }
+   
 
 
     $WorkingCSVFile = Import-Csv $CSVTAblePath 
