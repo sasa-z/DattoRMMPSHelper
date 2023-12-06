@@ -670,19 +670,24 @@ function send-CustomToastNofication {
     Write-Verbose "Creating CSV file: $($CSVTAblePath)"
 
         "" | select-object ToastHeader, ToastText, ToastAppLogo, ToastIdentifierName, type, DattoRMMValue, UniqueIdentifier, ifUserLoggedIn | export-csv -path "$($ScriptFolderLocation)\Hidden_Files\ToastNotificationValuesTable.csv" -NoTypeInformation -ErrorAction Stop
-        
+       
+        $WorkingCSVFile = Import-Csv $CSVTAblePath
+        $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
+        $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
+        Write-Verbose "CSV file created: $($CSVTAblePath)"
+
+
     }
         $WorkingCSVFile = Import-Csv $CSVTAblePath
         $WorkingCSVFile.ToastHeader = $Header
         $WorkingCSVFile.ToastIdentifierName = ($scriptname -replace " ", '')
         $WorkingCSVFile.ToastAppLogo = $ToastNotificationAppLogo 
         $WorkingCSVFile.DattoRMMValue = $dattoEnvironmentVaribleValue 
-        $WorkingCSVFile.UniqueIdentifier = "$($scriptname)---0"
+   
         $WorkingCSVFile.DattoRMMValue = $ToastNotifications
         $WorkingCSVFile.ToastText = $text
         $WorkingCSVFile | export-csv -path $CSVTAblePath -NoTypeInformation -ErrorAction Stop
 
-        Write-Verbose "CSV file created: $($CSVTAblePath)"
      
    
 
