@@ -885,7 +885,7 @@ Function send-CustomFinalToastNotification {
         Write-Verbose "Root Script Folder not provided. Pulling from Datto RMM variable: $($rootScriptFolder)"
 
     }
-    
+
     if ($rootScriptFolder[-1] -like '\'){
         $rootScriptFolder = $rootScriptFolder.Substring(0, $rootScriptFolder.Length - 1)
     }else{
@@ -1351,6 +1351,8 @@ $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 
 [int]$counterUniqueIdentifier = 0
 if($ifUserLoggedInCheck){
+
+    remove-BTNotification -UniqueIdentifier "$scriptName" -ErrorAction SilentlyContinue #main one
 
     1.15 | ForEach-Object {
 
