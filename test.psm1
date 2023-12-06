@@ -10,6 +10,7 @@ function store {
     
     write-host $variableName
     write-host "testing"
+    write-host $env:rootScriptFolder
     
     
 }
