@@ -268,7 +268,7 @@ try{
                 send-log -logText "Successfully updated Chocolatey" -addDashes Below
     
             }catch{
-                send-log -logText "Failed to update Chocolatey :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning
+                send-log -logText "Failed to update Chocolatey" -type Warning -catch
             }
 
         }
@@ -283,7 +283,7 @@ try{
 
             send-log -logText "Successfully installed Chocolatey" -addDashes Below
         }catch{
-            send-log -logText "Failed to install chocolatey :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Error -addTeamsMessage
+            send-log -logText "Failed to install chocolatey" -type Error -addTeamsMessage -catch
             exit 1
 
         }
@@ -291,7 +291,7 @@ try{
     }
     
     }catch{
-        send-log -logText "Failed to install chocolatey :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Error -addTeamsMessage
+        send-log -logText "Failed to install chocolatey" -type Error -addTeamsMessage -catch
         exit 1
 }
 
@@ -351,7 +351,7 @@ if ($BruntToast){
         send-log -logText "Successfully imported BurntToast module"
         
     }catch{
-        send-log -logText "Failed to import BurntToast module with error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning
+        send-log -logText "Failed to import BurntToast module with error" -type Warning -catch
         
     }
     
@@ -363,7 +363,7 @@ if ($BruntToast){
         
 
     }catch{
-        send-log -logText "Failed to install BurntToast module with error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning
+        send-log -logText "Failed to install BurntToast module with error" -type Warning -catch
 
     }
 }
@@ -480,7 +480,7 @@ try{
         #endregion ToastNotification files
 
     }catch{
-        send-Log -logText "Failed to create "$FolderForToastNotifications" folder. Error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber) " -type Error
+        send-Log -logText "Failed to create "$FolderForToastNotifications" folder. " -type Error -catch
     
     }
    
@@ -500,7 +500,7 @@ try{
     }
         copy-item Chocolatey.png -Destination "$($FolderForToastNotifications)\Chocolatey.png" -Force -ErrorAction SilentlyContinue
     }catch{
-        send-Log -logText "Failed to copy Toast Notification logos :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Warning 
+        send-Log -logText "Failed to copy Toast Notification logos" -type Warning  -catch
     }
     
    
@@ -522,7 +522,7 @@ try{
 
 
 }catch{
-    send-Log -logText "Failed to create script working folder $ScriptFolderLocation :  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber)" -type Error -addDashes Below 
+    send-Log -logText "Failed to create script working folder $ScriptFolderLocation" -type Error -addDashes Below  -catch
 
     exit 1
 }
@@ -1254,7 +1254,7 @@ function check-softwarePresence{
                     if($chocoSoftwareCheck){$InstalledViaChoco = $true}else{$InstalledViaChoco = $false}
 
                 }catch{
-                    send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber). Exiting script" -addDashes Below -type Error  
+                    send-Log -logText "Failed to check if $($Softwarename) is installed. Exiting script" -addDashes Below -type Error   -catch
                     exit 1
         
                 }
@@ -1299,7 +1299,7 @@ function check-softwarePresence{
                }
 
         }catch{
-            send-Log -logText "Failed to check if $($Softwarename) is installed:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber). Exiting script" -addDashes Below -type Error  
+            send-Log -logText "Failed to check if $($Softwarename) is installed. Exiting script" -addDashes Below -type Error    -catch
             exit 1
         }
 
