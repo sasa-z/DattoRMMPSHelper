@@ -201,7 +201,7 @@ if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScrip
             send-log  -logText "Successfully installed RunAsUser module" -type Info -addDashes Below
     
         }catch{
-            send-log  -logText "Failed to install RunAsUser module with error:  $($_.exception.message) at line $($_.InvocationInfo.ScriptLineNumber). Exiting script" -type Error -addDashes Below
+            send-log  -logText "Failed to install RunAsUser module with error. Exiting script" -type Error -addDashes Below -catch
             exit 1            
         }
     }
@@ -862,7 +862,7 @@ Function send-CustomFinalToastNotification {
         $ToastNotifications = $env:ToastNotifications
     }
 
-    write-host "ToastNotifications value for finalToastlNotification is : " $ToastNotifications
+
     
     if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
     if (-not $Action){
