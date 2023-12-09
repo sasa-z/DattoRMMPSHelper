@@ -1349,7 +1349,11 @@ $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 [int]$counterUniqueIdentifier = 0
 if($ifUserLoggedInCheck){
 
-    remove-BTNotification -group "$scriptName" -ErrorAction SilentlyContinue #main one
+   
+    Invoke-AsCurrentUser {
+        remove-BTNotification -group "$scriptName" -ErrorAction SilentlyContinue #main one
+
+    }
 
     1.15 | ForEach-Object {
 
