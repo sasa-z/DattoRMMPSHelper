@@ -433,6 +433,7 @@ $scriptFolderLocation = "$rootScriptFolder\$scriptName"
 if(-not $FolderForToastNotifications){
     $partForToastNOtifications = (Split-Path $rootScriptFolder -Parent)
     $FolderForToastNotifications = "$partForToastNOtifications\Toast_Notification_Files"
+    Write-Verbose "Variable FolderForToastNotifications assigned with this value: $FolderForToastNotifications"
 }
 
 Write-Verbose "Parameters are: "
@@ -450,13 +451,17 @@ try{
     #remove previous folder is exists
     if (test-path "$rootScriptFolder\$scriptName"){
         Write-Verbose "Removing previous folder:  $rootScriptFolder\$scriptName "
+
         Remove-Item -Path "$rootScriptFolder\$scriptName\" -Recurse -Force
+
+        Write-Verbose "Removed previous folder:  $rootScriptFolder\$scriptName "
     }
     
     New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null
     Write-Verbose "Created scriptname folder:  $rootScriptFolder\$scriptName "
 
     New-Item -Path "$scriptFolderLocation" -Name 'Logs.txt' -ItemType File -Force | out-null
+    Write-Verbose "Created Logs.txt file:  $scriptFolderLocation\Logs.txt "
 
     #create hidden folder to copy files for toast notifications
     try{
@@ -464,6 +469,8 @@ try{
         New-Item -Path (Split-Path $FolderForToastNotifications -Parent) -Name (Split-Path $FolderForToastNotifications -Leaf) -ItemType Directory -Force -ErrorAction Stop | out-null
         $Folder = get-item "$FolderForToastNotifications" -Force
         $Folder.Attributes = "Hidden"
+
+        Write-Verbose "Created hidden folder for toast notifications:  $FolderForToastNotifications "
 
         <#
         As runas-currentuser module can't use variables from this script, we have to store them into files into this hidden folder. 
@@ -473,6 +480,8 @@ try{
         $Folder = get-item "$($ScriptFolderLocation)\Hidden_Files" -Force
         $Folder.Attributes = "Hidden"
 
+        Write-Verbose "Created hidden folder for hidden files:  $($ScriptFolderLocation)\Hidden_Files "
+
         #region ToastNotification files
 
         #create CSV file for Toast Notification information
@@ -481,16 +490,21 @@ try{
 
     }catch{
         send-Log -logText "Failed to create "$FolderForToastNotifications" folder. " -type Error -catch
+        Write-Verbose "Failed to create "$FolderForToastNotifications" folder. "
     
     }
    
     #file for last message that will be sent to Teams
     New-Item -Path $ScriptFolderLocation\Hidden_Files -Name "TeamsMessage.txt" -ItemType File -Force -ErrorAction Stop | out-null
 
+    Write-Verbose "Created teamsMessage.txt file in hidden folder:  $($ScriptFolderLocation)\Hidden_Files "
 
+    Write-Verbose "About to create scriptName.txt file in hidden folder:  $($rootScriptFolder)\scriptName.txt "
     $scriptname | out-file $rootScriptFolder\scriptName.txt -Force
     $file = get-item "$($rootScriptFolder)\scriptName.txt" -Force
     $file.Attributes = "Hidden"
+
+    Write-Verbose "Created scriptName.txt file in hidden folder:  $($rootScriptFolder)\scriptName.txt "
 
     
     #copy Toast Notification logos uploaded to Datto RMM
@@ -499,6 +513,8 @@ try{
         copy-item Warning.png -Destination "$($FolderForToastNotifications)\Warning.png" -Force -ErrorAction SilentlyContinue
         copy-item Error.png -Destination "$($FolderForToastNotifications)\Error.png" -Force -ErrorAction SilentlyContinue
         copy-item Success.png -Destination "$($FolderForToastNotifications)\Success.png" -Force -ErrorAction SilentlyContinue
+
+        Write-Verbose "Copied Toast Notification logos"
         
     if ($ToastNotificationAppLogo){
         copy-item $ToastNotificationAppLogo -Destination "$($FolderForToastNotifications)\$($ToastNotificationAppLogo)" -Force -ErrorAction SilentlyContinue
@@ -528,7 +544,6 @@ try{
 
 }catch{
     send-Log -logText "Failed to create script working folder $ScriptFolderLocation" -type Error -addDashes Below  -catch
-
     exit 1
 }
 }
@@ -1351,18 +1366,10 @@ function remove-oldToastNotifications{
     
 $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 
-[int]$counterUniqueIdentifier = 0
+
 if($ifUserLoggedInCheck){
 
-    Invoke-AsCurrentUser {
-        remove-BTNotification -group "$scriptName" -ErrorAction SilentlyContinue #main one
-
-    }
-
- 
-
-        
-        
+  
         Invoke-AsCurrentUser {
 
             $scriptname = Get-Content C:\yw-data\automate\scriptName.txt -Force
@@ -1371,11 +1378,14 @@ if($ifUserLoggedInCheck){
             1..10 | ForEach-Object {
             
                 if ($_ -eq 1){
+                    Write-Verbose "Removing $scriptname and $scriptname---0 old toast notifications"
                     remove-BTNotification -group "$scriptname" 
                     remove-BTNotification -group "$scriptname---0" 
                 }else{
                     $UniqueIdentifierNumber++
                     $OldIdentifier = "$scriptName" + '---' + "$UniqueIdentifierNumber"
+
+                    Write-Verbose "Removing $OldIdentifier old toast notification"
                     remove-BTNotification -group "$OldIdentifier" 
 
                 }
