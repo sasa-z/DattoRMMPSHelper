@@ -486,7 +486,15 @@ try{
    
     #file for last message that will be sent to Teams
     New-Item -Path $ScriptFolderLocation\Hidden_Files -Name "TeamsMessage.txt" -ItemType File -Force -ErrorAction Stop | out-null
-    
+
+
+    $scriptname | out-file $rootScriptFolder\scriptName.txt -Force
+    $file = get-item "$($rootScriptFolder)\scriptName.txt" -Force
+    $file.Attributes = "Hidden"
+
+    $rootScriptFolder | out-file $rootScriptFolder\rootScriptFolder.txt -Force
+    $file = get-item "$($rootScriptFolder)\rootScriptFolder.txt" -Force
+    $file.Attributes = "Hidden"
     
     #copy Toast Notification logos uploaded to Datto RMM
     
@@ -1349,7 +1357,6 @@ $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 [int]$counterUniqueIdentifier = 0
 if($ifUserLoggedInCheck){
 
-   
     Invoke-AsCurrentUser {
         remove-BTNotification -group "$scriptName" -ErrorAction SilentlyContinue #main one
 
@@ -1357,11 +1364,14 @@ if($ifUserLoggedInCheck){
 
     1.15 | ForEach-Object {
 
-        $counterUniqueIdentifier++
-
-        $OldIdentifier = "$scriptName" + '---' + "$counterUniqueIdentifier"
+        
         
         Invoke-AsCurrentUser {
+            
+            $scriptname = Get-Content C:\yw-data\automate\scriptName.text                        
+            $counterUniqueIdentifier++
+            $OldIdentifier = "$scriptName" + '---' + "$counterUniqueIdentifier"
+
             remove-BTNotification -group "$OldIdentifier" 
     
         }
