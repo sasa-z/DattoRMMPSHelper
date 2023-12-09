@@ -978,7 +978,7 @@ Function send-CustomFinalToastNotification {
 
             Write-Verbose  "ToastNotifications Value is ALL"
 
-            Invoke-AsCurrentUser {
+            Invoke-AsCurrentUser{
 
                 $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
                 $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
@@ -1380,6 +1380,7 @@ function remove-oldToastNotifications{
     )
     
     Write-Verbose "Executing function remove-oldToastNotifications with scriptName $scriptname"
+    if (test-path c:\yw-data\automate\scriptName.txt){remove-item c:\yw-data\automate\scriptName.txt -Force}
     $scriptname | out-file c:\yw-data\automate\scriptName.txt -Force
 
 $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
