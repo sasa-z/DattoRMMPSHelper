@@ -503,6 +503,7 @@ try{
     if (Test-Path $rootScriptFolder\scriptName.txt){
         Remove-Item $rootScriptFolder\scriptName.txt -Force
     }
+    
     $scriptname | out-file $rootScriptFolder\scriptName.txt -Force
     $file = get-item "$($rootScriptFolder)\scriptName.txt" -Force
     $file.Attributes = "Hidden"
@@ -1367,9 +1368,8 @@ function remove-oldToastNotifications{
         
     )
     
-    Write-Verbose "ScriptName is $scriptname"
-    write-host "ScriptName is $scriptname"
-    "ScriptName $scriptname" | out-file c:\yw-data\automate\scriptName.txt -Force
+    Write-Verbose "Executing function remove-oldToastNotifications with scriptName $scriptname"
+    $scriptname | out-file c:\yw-data\automate\scriptName.txt -Force
 
 $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 
@@ -1380,8 +1380,7 @@ if($ifUserLoggedInCheck){
         Invoke-AsCurrentUser {
 
             $scriptname = Get-Content C:\yw-data\automate\scriptName.txt -Force
-            $UniqueIdentifierNumber = 0  
-            '' | out-file c:\yw-data\checking.txt -Force
+            $UniqueIdentifierNumber = 0             
 
             1..10 | ForEach-Object {
             
