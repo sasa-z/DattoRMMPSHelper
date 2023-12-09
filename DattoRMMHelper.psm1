@@ -500,6 +500,9 @@ try{
     Write-Verbose "Created teamsMessage.txt file in hidden folder:  $($ScriptFolderLocation)\Hidden_Files "
 
     Write-Verbose "About to create scriptName.txt file in hidden folder:  $($rootScriptFolder)\scriptName.txt "
+    if (Test-Path $rootScriptFolder\scriptName.txt){
+        Remove-Item $rootScriptFolder\scriptName.txt -Force
+    }
     $scriptname | out-file $rootScriptFolder\scriptName.txt -Force
     $file = get-item "$($rootScriptFolder)\scriptName.txt" -Force
     $file.Attributes = "Hidden"
