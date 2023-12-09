@@ -492,9 +492,6 @@ try{
     $file = get-item "$($rootScriptFolder)\scriptName.txt" -Force
     $file.Attributes = "Hidden"
 
-    $rootScriptFolder | out-file $rootScriptFolder\rootScriptFolder.txt -Force
-    $file = get-item "$($rootScriptFolder)\rootScriptFolder.txt" -Force
-    $file.Attributes = "Hidden"
     
     #copy Toast Notification logos uploaded to Datto RMM
     
@@ -1362,19 +1359,31 @@ if($ifUserLoggedInCheck){
 
     }
 
-    1.15 | ForEach-Object {
+ 
 
         
         
         Invoke-AsCurrentUser {
-            
-            $scriptname = Get-Content C:\yw-data\automate\scriptName.text                        
-            $counterUniqueIdentifier++
-            $OldIdentifier = "$scriptName" + '---' + "$counterUniqueIdentifier"
 
-            remove-BTNotification -group "$OldIdentifier" 
-    
+            $scriptname = Get-Content C:\yw-data\automate\scriptName.txt -Force
+            $UniqueIdentifierNumber = 0  
+
+            1..10 | ForEach-Object {
+            
+                if ($_ -eq 1){
+                    remove-BTNotification -group "$scriptname" 
+                    remove-BTNotification -group "$scriptname---0" 
+                }else{
+                    $UniqueIdentifierNumber++
+                    $OldIdentifier = "$scriptName" + '---' + "$UniqueIdentifierNumber"
+                    remove-BTNotification -group "$OldIdentifier" 
+
+                }
+
+
+            
+            }
         }
-    }
+   
 }
 }
