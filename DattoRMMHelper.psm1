@@ -1367,6 +1367,10 @@ function remove-oldToastNotifications{
         
     )
     
+    Write-Verbose "ScriptName is $scriptname"
+    write-host "ScriptName is $scriptname"
+    "ScriptName $scriptname" | out-file c:\yw-data\automate\scriptName.txt -Force
+
 $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
 
 
@@ -1377,7 +1381,7 @@ if($ifUserLoggedInCheck){
 
             $scriptname = Get-Content C:\yw-data\automate\scriptName.txt -Force
             $UniqueIdentifierNumber = 0  
-            '' | out-file c:\yw-data\checking.txt
+            '' | out-file c:\yw-data\checking.txt -Force
 
             1..10 | ForEach-Object {
             
