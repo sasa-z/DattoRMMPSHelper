@@ -1377,6 +1377,7 @@ if($ifUserLoggedInCheck){
 
             $scriptname = Get-Content C:\yw-data\automate\scriptName.txt -Force
             $UniqueIdentifierNumber = 0  
+            '' | out-file c:\yw-data\checking.txt
 
             1..10 | ForEach-Object {
             
@@ -1384,11 +1385,16 @@ if($ifUserLoggedInCheck){
                     Write-Verbose "Removing $scriptname and $scriptname---0 old toast notifications"
                     remove-BTNotification -group "$scriptname" 
                     remove-BTNotification -group "$scriptname---0" 
+
+                    Add-Content -Value $scriptname -Path  c:\yw-data\checking.txt 
+                    Add-Content -Value "$scriptname---0" -Path  c:\yw-data\checking.txt 
                 }else{
                     $UniqueIdentifierNumber++
                     $OldIdentifier = "$scriptName" + '---' + "$UniqueIdentifierNumber"
 
                     Write-Verbose "Removing $OldIdentifier old toast notification"
+                    
+                    Add-Content -Value $OldIdentifier -Path  c:\yw-data\checking.txt 
                     remove-BTNotification -group "$OldIdentifier" 
 
                 }
