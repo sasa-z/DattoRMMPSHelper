@@ -527,6 +527,17 @@ try{
     }catch{
         send-Log -logText "Failed to copy Toast Notification logos" -type Warning  -catch
     }
+
+    #script core info
+      #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
+      try{remove-item "$($rootScriptFolder)\ScriptCoreInfo.csv" -ErrorAction SilentlyContinue}catch{}
+      "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder" | Export-Csv -Path "$($rootScriptFolder)\ScriptCoreInfo.csv" -NoTypeInformation
+      $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\ScriptCoreInfo.csv"
+      $ImportTempCSVInfo.ScriptName = $scriptName
+      $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
+      $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
+      $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\ScriptCoreInfo.csv" -NoTypeInformation
+      
     
    
     #add variable values into log file
@@ -1389,15 +1400,12 @@ if($ifUserLoggedInCheck){
                     remove-BTNotification -group "$scriptname" 
                     remove-BTNotification -group "$scriptname---0" 
 
-                    Add-Content -Value $scriptname -Path  c:\yw-data\checking.txt 
-                    Add-Content -Value "$scriptname---0" -Path  c:\yw-data\checking.txt 
                 }else{
                     $UniqueIdentifierNumber++
                     $OldIdentifier = "$scriptName" + '---' + "$UniqueIdentifierNumber"
 
                     Write-Verbose "Removing $OldIdentifier old toast notification"
-                    
-                    Add-Content -Value $OldIdentifier -Path  c:\yw-data\checking.txt 
+
                     remove-BTNotification -group "$OldIdentifier" 
 
                 }
