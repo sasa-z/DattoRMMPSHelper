@@ -1,4 +1,3 @@
-$VerbosePreference = 'continue'
 
 function send-Log {
 
