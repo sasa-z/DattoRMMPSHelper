@@ -39,7 +39,7 @@
          if ($preSoftwareCheck.installed){
 
              send-log -logText "$($Softwarename) is already installed: version $($preSoftwareCheck.version). `nExiting script." -addDashes Below -addTeamsMessage
-             send-CustomToastNofication -text "Software already installed." 
+             send-CustomToastNofication -text "Already installed." 
 
          }else{
 
