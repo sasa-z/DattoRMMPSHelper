@@ -1279,17 +1279,27 @@ function check-softwarePresence{
 
                 
                     $chocoSoftwareCheck = (choco list) | select-string $ChocolateyName
+                    Write-Verbose "Successfully listed software installed via Chocolatey"
                     
-                    if($chocoSoftwareCheck){$VersionViaChoco = $chocoSoftwareCheck.Line.Split(" ")[1]}else{$VersionViaChoco = ""}
+                    if($chocoSoftwareCheck){
+                        $VersionViaChoco = $chocoSoftwareCheck.Line.Split(" ")[1]
+                        Write-Verbose "Version of $($Softwarename) is $($VersionViaChoco)"
+                    }else{  
+                        $VersionViaChoco = ""
+                        Write-Verbose "Couldn't determine version of $($Softwarename) via Chocolatey"
+                    }
 
-                    $UpdateNeededCheckViaChoco = choco outdated -r | select-string $ChocolateyName # switch -r means to limit the output to essential information only
+                    if ($chocoSoftwareCheck){
+                        $UpdateNeededCheckViaChoco = choco outdated -r | select-string $ChocolateyName # switch -r means to limit the output to essential information only
+                        Write-Verbose "Generated list of outdated software via Chocolatey"
+                    }
                 
  
                     if($UpdateNeededCheckViaChoco){$UpdatedNeededViaChoco = $true}else{$UpdatedNeededViaChoco = $false}
                     if($chocoSoftwareCheck){$InstalledViaChoco = $true}else{$InstalledViaChoco = $false}
 
                 }catch{
-                    send-Log -logText "Failed to check if $($Softwarename) is installed. Exiting script" -addDashes Below -type Error   -catch
+                    send-Log -logText "Failed to check if $($Softwarename) is installed via Chocolatey. Exiting script" -addDashes Below -type Error   -catch
                     exit 1
         
                 }
