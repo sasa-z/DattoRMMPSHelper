@@ -1,4 +1,4 @@
-
+$VerbosePreference = 'continue'
 
 function send-Log {
 
@@ -96,7 +96,7 @@ function send-Log {
     $DateStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
         if ($catch.IsPresent){
-            $logString = "$logtext. Error: $($_.exception.message), at line $($_.InvocationInfo.ScriptLineNumber)"
+            $logText = "$logtext. Error: $($_.exception.message), at line $($_.InvocationInfo.ScriptLineNumber)"
         }
 
     if ($addDashes -eq "Above"){
@@ -1299,7 +1299,7 @@ function check-softwarePresence{
                     if($chocoSoftwareCheck){$InstalledViaChoco = $true}else{$InstalledViaChoco = $false}
 
                 }catch{
-                    send-Log -logText "Failed to check if $($Softwarename) is installed via Chocolatey. Exiting script" -addDashes Below -type Error   -catch
+                    send-Log -logText "Failed to check if $($Softwarename) is installed via Chocolatey. Exiting script" -addDashes Below -type Error -catch
                     exit 1
         
                 }
@@ -1344,7 +1344,7 @@ function check-softwarePresence{
                }
 
         }catch{
-            send-Log -logText "Failed to check if $($Softwarename) is installed. Exiting script" -addDashes Below -type Error    -catch
+            send-Log -logText "Failed to check if $($Softwarename) is installed via get-package. Exiting script" -addDashes Below -type Error    -catch
             exit 1
         }
 
