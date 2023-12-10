@@ -870,6 +870,7 @@ Function send-CustomFinalToastNotification {
          [string]$Company,
          [string]$Action,
          [switch]$SendToTeams,
+         [switch]$PCSetup,
          [string]$rootScriptFolder = $rootScriptFolder,    
          [string]$scriptname = $scriptname
 
@@ -929,6 +930,7 @@ Function send-CustomFinalToastNotification {
     Write-Verbose "SendToTeams :  $SendToTeams "
     Write-Verbose "rootScriptFolder :  $rootScriptFolder "
     Write-Verbose "scriptname :  $scriptname "
+    Write-Verbose "PCSetup :  $PCSetup "
 
 
     $ifUserLoggedInCheck  = (Get-WmiObject -ClassName Win32_ComputerSystem).Username
@@ -941,21 +943,35 @@ Function send-CustomFinalToastNotification {
         Write-Verbose "UserLoggedIn value for finalToastlNotification is :  $UserLoggedIn "
     }
 
+   
+
      #export root script info to csv as invoke-ascurrentuser can't read variables outside of its scope
      try{remove-item "$($rootScriptFolder)\tempFinalInfo.csv" -ErrorAction SilentlyContinue}catch{}
-     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","ToastNotifications","FolderForToastNotifications", "ToastHeader","UserLoggedIn" | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
+     "" | Select-Object "ScriptName", "ScriptFolderLocation", "rootScriptFolder","ToastNotifications","FolderForToastNotifications", "ToastHeader","UserLoggedIn", "PCSetup"| Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
      $ImportTempCSVInfo = Import-Csv "$($rootScriptFolder)\tempFinalInfo.csv"
      $ImportTempCSVInfo.ScriptName = $scriptName
      $ImportTempCSVInfo.ScriptFolderLocation = $scriptFolderLocation
      $ImportTempCSVInfo.rootScriptFolder = $rootScriptFolder
      $ImportTempCSVInfo.UserLoggedIn = $UserLoggedIn
      $ImportTempCSVInfo.FolderForToastNotifications = $FolderForToastNotifications
-     $ImportTempCSVInfo.ToastHeader = $Header
+     $ImportTempCSVInfo.ToastHeader = $Header 
+     $ImportTempCSVInfo.PCSetup = if($PCSetup.IsPresent){'Yes'}else{'No'} 
      $ImportTempCSVInfo.ToastNotifications = $ToastNotifications
      $ImportTempCSVInfo | Export-Csv -Path "$($rootScriptFolder)\tempFinalInfo.csv" -NoTypeInformation
      
+
+     #check if errors or warnings exists
+     if ($PCSetup.IsPresent){ #this is used only for PC setup script
+         
+        $Check = Get-ChildItem -Recurse -Path $rootScriptFolder | where-object {$_.name -like 'warnings.txt' -or $_.name -like 'errors.txt'}
+        
+        if ($check){$NOErrors = $true}else{$NOErrors = $false }
+     }else{ #this is used for all other scripts
+        $check = (test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt)
+        if ($Check){$NOErrors = $true }else{ $NOErrors = $false }
+     }
     
-    if ((test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt))  {
+    if ($NOErrors)  {
     
         #script completed without errors or warning
         Write-Verbose "No Errors or Warnings. Script completed successfully"    
@@ -963,13 +979,18 @@ Function send-CustomFinalToastNotification {
     
         if ($ToastNotifications -eq 'all'){  #send toast notification per Datto RMM variable
 
-            Write-Verbose  "ToastNotifications Value is ALL"
-
             Invoke-AsCurrentUser{
 
-                $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
+                $PCSetup = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty PCSetup
+                if($PCSetup -eq 'Yes'){
+                    $scriptName = "PC SETUP"
+                    $ToastHeader = "PC SETUP"
+                }else{
+
+                    $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
+                    $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
+                }
                 $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
-                $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
                 $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
                 $FolderForToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty FolderForToastNotifications
@@ -978,7 +999,9 @@ Function send-CustomFinalToastNotification {
        
                if ($userIsLoggedIn -eq "Yes"){ #skip notifications if user not logged in
                    if ($ToastNotifications -eq 'All'){ #alway push toast notifications
-                       New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\success.png" -UniqueIdentifier "$scriptname"
+
+                            New-BurntToastNotification -Text "$($ToastHeader)","COMPLETED SUCCESSFULLY" -AppLogo "$($FolderForToastNotifications)\success.png" -UniqueIdentifier "$scriptname"
+                       
                    
                     }
                }
@@ -1059,10 +1082,18 @@ Function send-CustomFinalToastNotification {
         if ($ToastNotifications -eq 'Errors' -or $ToastNotifications -eq 'WarningsErrors' ){
     
             Invoke-AsCurrentUser {
+
+                $PCSetup = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty PCSetup
+                if($PCSetup -eq 'Yes'){
+                    $scriptName = "PC SETUP"
+                    $ToastHeader = "PC SETUP"
+                }else{
+
+                    $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
+                    $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
+                }
                
-                $ScriptName = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ScriptName
                 $rootScriptFolder = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty rootScriptFolder
-                $ToastHeader = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastHeader
                 $userIsLoggedIn = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty UserLoggedIn
                 $ToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty ToastNotifications
                 $FolderForToastNotifications = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty FolderForToastNotifications
