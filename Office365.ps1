@@ -85,7 +85,7 @@ $config = @"
                  
                      send-CustomToastNofication -text "Starting installation"
 
-                     send-log -logText "Installation Argumentlist is "
+                     send-log -logText "Installation Argumentlist is install office365business -y --force --params `"'/configpath:$scriptfolderlocation\OfficeConfig.xml /eula:FALSE'`""
                      try{
                              #start-process choco -ArgumentList "install office365business --version=16731.20354 --forcex86 /configpath:$ScriptFolderLocation\config.xml -y --force" -ErrorAction Stop -Wait
                              start-process choco -ArgumentList "install office365business -y --force --params `"'/configpath:$scriptfolderlocation\OfficeConfig.xml /eula:FALSE'`"" -ErrorAction Stop -Wait
