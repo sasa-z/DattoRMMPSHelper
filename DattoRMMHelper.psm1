@@ -251,6 +251,8 @@ function get-Chocolatey {
 #create script folder if it doesn't exist
 if (-not (test-path "$rootScriptFolder\$scriptName")){New-Item -Path "$rootScriptFolder" -Name "$scriptName" -ItemType Directory -Force -ErrorAction Stop | out-null}
 
+send-Log -logText "Checking if Chocolatey is installed" -addDashes Below
+
 try{
 
     $ChocoCheck = get-command choco.exe -ErrorAction SilentlyContinue
@@ -258,22 +260,7 @@ try{
     if ($ChocoCheck){   
 
         send-log -logText "Chocolatey is already installed" -addDashes Below
-        
-        $ChocoUpdateNeeded = choco outdated -r | select-string 'chocolatey'
-
-        if ($ChocoUpdateNeeded){
-
-            try{
-                start-process -FilePath choco -ArgumentList "upgrade chocolatey -y" -ErrorAction stop -Wait  | Out-Null
-                send-log -logText "Successfully updated Chocolatey" -addDashes Below
-    
-            }catch{
-                send-log -logText "Failed to update Chocolatey" -type Warning -catch
-            }
-
-        }
-
-       
+               
 
     }else{ #install chocolatey
         try{
