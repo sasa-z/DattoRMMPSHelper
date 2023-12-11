@@ -1000,7 +1000,7 @@ Function send-CustomFinalToastNotification {
 
                 $PCSetup = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty PCSetup
                 if($PCSetup -eq 'Yes'){
-                    $scriptName = "PC SETUP"
+                    $scriptName = "PC_SETUP"
                     $ToastHeader = "PC SETUP"
                 }else{
 
@@ -1096,13 +1096,13 @@ Function send-CustomFinalToastNotification {
     
         send-Log -logText "SCRIPT $($ScriptName) COMPLETED WITH ERRORS" -type Warning   -addDashes Above
     
-        if ($ToastNotifications -eq 'Errors' -or $ToastNotifications -eq 'WarningsErrors' ){
+        if ($ToastNotifications -eq 'Errors' -or $ToastNotifications -eq 'WarningsErrors' -or $ToastNotifications -eq 'All'){
     
             Invoke-AsCurrentUser {
 
                 $PCSetup = import-csv c:\yw-data\automate\tempFinalInfo.csv | select-object -expandproperty PCSetup
                 if($PCSetup -eq 'Yes'){
-                    $scriptName = "PC SETUP"
+                    $scriptName = "PC_SETUP"
                     $ToastHeader = "PC SETUP"
                 }else{
 
