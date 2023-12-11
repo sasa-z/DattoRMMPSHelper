@@ -884,7 +884,9 @@ Function send-CustomFinalToastNotification {
         $ToastNotifications = $env:ToastNotifications
     }
 
-
+    if ($PCSetup.IsPresent){
+        $scriptname = 'PC_Setup'
+    }
     
     if (-not $Company){$Company = $ENV:CS_PROFILE_NAME}
     if (-not $Action){
@@ -966,10 +968,10 @@ Function send-CustomFinalToastNotification {
         
         if ($check){
             $NOErrors = $false
-            send-Log -logText "Errors or Warnings found found after PCSetup script"
+            send-Log -logText "Errors or Warnings found found after PCSetup script" -type Warning
         }else{
             $NOErrors = $true 
-            send-Log -logText "No Errors or Warnings found after PCSetup script" -type Warning
+            send-Log -logText "No Errors or Warnings found after PCSetup script"
         }
 
      }else{ #this is used for all other scripts
@@ -981,7 +983,7 @@ Function send-CustomFinalToastNotification {
         }else{ 
             
             $NOErrors = $false 
-            send-Log -logText "Mo Errors or Warnings found after script execution" -type Warning
+            send-Log -logText "Mo Errors or Warnings found after script execution" 
 
         
         }
@@ -1029,8 +1031,13 @@ Function send-CustomFinalToastNotification {
         
     
       #region Send teams notification
+    if ($PCSetup.IsPresent){
+        $teamsMessageFile = "PC SETUP script completed successfully"
+    }else{
+        
+        $teamsMessageFile = get-content $ScriptFolderLocation\Hidden_Files\TeamsMessage.txt
+    }
     
-    $teamsMessageFile = get-content $ScriptFolderLocation\Hidden_Files\TeamsMessage.txt
      
     $JSONBody = [PSCustomObject][Ordered]@{
         "@type"      = "MessageCard"
@@ -1127,8 +1134,11 @@ Function send-CustomFinalToastNotification {
         }
       
      #region Send teams notification
+     if ($PCSetup.IsPresent){
+        $teamsMessageFile = "PC SETUP script failed"
+    }else{
      $teamsMessageFile = get-content $ScriptFolderLocation\Hidden_Files\TeamsMessage.txt
-     
+    }
  
    
 $JSONBody = [PSCustomObject][Ordered]@{
