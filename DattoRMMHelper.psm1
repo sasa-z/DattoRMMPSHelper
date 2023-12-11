@@ -962,9 +962,9 @@ Function send-CustomFinalToastNotification {
      #check if errors or warnings exists
      if ($PCSetup.IsPresent){ #this is used only for PC setup script
          
-        $Check = Get-ChildItem -Recurse -Path $rootScriptFolder | where-object {$_.name -like 'warnings.txt' -or $_.name -like 'errors.txt'}
+        $Check = Get-ChildItem -Recurse -Path $rootScriptFolder -Force | where-object {$_.name -like 'warnings.txt' -or $_.name -like 'errors.txt'}
         
-        if ($check){$NOErrors = $true}else{$NOErrors = $false }
+        if ($check){$NOErrors = $false}else{$NOErrors = $true }
      }else{ #this is used for all other scripts
         $check = (test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt)
         if ($Check){$NOErrors = $true }else{ $NOErrors = $false }
