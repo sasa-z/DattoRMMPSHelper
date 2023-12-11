@@ -961,13 +961,31 @@ Function send-CustomFinalToastNotification {
 
      #check if errors or warnings exists
      if ($PCSetup.IsPresent){ #this is used only for PC setup script
-         
+         send-Log -logText "PCSetup parameter is used"
         $Check = Get-ChildItem -Recurse -Path $rootScriptFolder -Force | where-object {$_.name -like 'warnings.txt' -or $_.name -like 'errors.txt'}
         
-        if ($check){$NOErrors = $false}else{$NOErrors = $true }
+        if ($check){
+            $NOErrors = $false
+            send-Log -logText "Errors or Warnings found found after PCSetup script"
+        }else{
+            $NOErrors = $true 
+            send-Log -logText "No Errors or Warnings found after PCSetup script" -type Warning
+        }
+
      }else{ #this is used for all other scripts
         $check = (test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt)
-        if ($Check){$NOErrors = $true }else{ $NOErrors = $false }
+        if ($Check){
+            
+            $NOErrors = $true 
+            send-Log -logText "Errors or Warnings found after script execution" -type Warning
+        }else{ 
+            
+            $NOErrors = $false 
+            send-Log -logText "Mo Errors or Warnings found after script execution" -type Warning
+
+        
+        }
+
      }
     
     if ($NOErrors)  {
