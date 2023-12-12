@@ -978,11 +978,11 @@ Function send-CustomFinalToastNotification {
         $check = ((test-path $ScriptFolderLocation\errors.txt) -or (test-path $ScriptFolderLocation\warnings.txt))
         if ($Check){
             
-            $NOErrors = $true 
+            $NOErrors = $false 
             send-Log -logText "Errors or Warnings found after script execution" -type Warning
         }else{ 
             
-            $NOErrors = $false 
+            $NOErrors = $true 
             send-Log -logText "Mo Errors or Warnings found after script execution" 
 
         
@@ -1503,6 +1503,7 @@ function download-file {
     $downloadDestination =  "$env:rootScriptFolder\$scriptname"
 
             $ProgressPreference = 'SilentlyContinue'
+            send-Log -logText "File download started and will be stored in $downloadDestination." -addDashes Below
             Invoke-WebRequest -Uri $url -OutFile $downloadDestination\$fileName -ErrorAction Stop | out-null 
             Unblock-File $downloadDestination\$fileName
             if(test-path $downloadDestination\$fileName){
