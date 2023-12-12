@@ -1504,7 +1504,7 @@ function download-file {
 
             $ProgressPreference = 'SilentlyContinue'
             Invoke-WebRequest -Uri $url -OutFile $downloadDestination\$fileName -ErrorAction Stop | out-null 
-            Unblock-File $downloadDestination
+            Unblock-File $downloadDestination\$fileName
             if(test-path $downloadDestination\$fileName){
                 send-log -logText "Download completed succesfully." -addDashes Below
             
