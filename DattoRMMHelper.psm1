@@ -975,7 +975,7 @@ Function send-CustomFinalToastNotification {
         }
 
      }else{ #this is used for all other scripts
-        $check = (test-path $ScriptFolderLocation\logs.txt) -and -not (test-path $ScriptFolderLocation\errors.txt) -and -not (test-path $ScriptFolderLocation\warnings.txt)
+        $check = ((test-path $ScriptFolderLocation\errors.txt) -or (test-path $ScriptFolderLocation\warnings.txt))
         if ($Check){
             
             $NOErrors = $true 
