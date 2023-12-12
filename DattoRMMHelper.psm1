@@ -1473,3 +1473,46 @@ if($ifUserLoggedInCheck){
    
 }
 }
+
+function download-file {
+
+    <#
+       .SYNOPSIS
+           Dowload file from internet
+       .DESCRIPTION
+           Dowload file from internet
+       .PARAMETER scriptName
+            It is a script name that is used to create uniqueToastNotification
+       .EXAMPLE
+            download-file -filURL $filURL -filName $filName
+        .OUTPUTS
+       .NOTES
+           FunctionName : 
+           Created by   : Sasa Zelic
+           Date Coded   : 12/2019
+    #>
+
+    [CmdletBinding()]
+    param(
+        [string]$scriptname = $scriptname,
+        [string]$url,
+        [string]$fileName
+        
+    )
+
+    $downloadDestination =  "$env:rootScriptFolder\$scriptname"
+
+            $ProgressPreference = 'SilentlyContinue'
+            Invoke-WebRequest -Uri $url -OutFile $downloadDestination\$fileName -ErrorAction Stop | out-null 
+            Unblock-File $downloadDestination
+            if(test-path $downloadDestination\$fileName){
+                send-log -logText "Download completed succesfully." -addDashes Below
+            
+            }else{
+                send-log -logText "Failed to download files." -addDashes Below -failed
+                exit 1            
+            
+            }
+
+
+}
