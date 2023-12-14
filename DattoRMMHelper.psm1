@@ -1051,7 +1051,7 @@ Function send-CustomFinalToastNotification {
     
                         @{
                             "name"  = ""
-                            "value" = "<strong style='color:#70B26C;'>$($env:COMPUTERNAME)</strong>"
+                            "value" = "<strong style='color:#ff9900;'>$($env:COMPUTERNAME)</strong>"
                         },
                         @{
                             "name"  = ""
@@ -1152,7 +1152,7 @@ $JSONBody = [PSCustomObject][Ordered]@{
 
             @{
                 "name"  = ""
-                "value" = "<strong style='color:#70B26C;'>$($env:COMPUTERNAME)</strong>"
+                "value" = "<strong style='color:#ff9900;'>$($env:COMPUTERNAME)</strong>"
             },
             @{
                 "name"  = ""
