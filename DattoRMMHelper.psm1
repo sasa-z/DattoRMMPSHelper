@@ -968,10 +968,8 @@ Function send-CustomFinalToastNotification {
         
         if ($check){
             $NOErrors = $false
-            send-Log -logText "Errors or Warnings found found after PCSetup script" -type Warning
         }else{
             $NOErrors = $true 
-            send-Log -logText "No Errors or Warnings found after PCSetup script"
         }
 
      }else{ #this is used for all other scripts
