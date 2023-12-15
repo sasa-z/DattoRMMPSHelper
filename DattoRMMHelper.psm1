@@ -1044,38 +1044,47 @@ Function send-CustomFinalToastNotification {
         "themeColor" = '0078D7'
         "sections"   = @(
               @{
-                  
              
+                "activityTitle"= "$($teamsMessageFile)"
+                "activitySubtitle"= "$env:computername"
+                "activityImage"= "https://yanceyworks.com/DattoRMMLogos/Success.png"
                       
-              "facts"            = @(
+                "facts"            = @(
     
-                        @{
-                            "name"  = ""
-                            "value" = "<strong style='color:#ff9900;'>$($env:COMPUTERNAME)</strong>"
-                        },
-                        @{
-                            "name"  = ""
-                            "value" = "<strong style='color:#2BB557;'>$($teamsMessageFile)</strong>"
-                          },
-                          @{
-                            "name"  = ""
-                            "value" = "<strong style='color:#3192E3;'>$($ScriptName)</strong>"
-                          },
-                        @{
-                              "name"  = "Company:"
-                              "value" = "$($Company)"
-                            },
+               
+                @{
+                      "name"  = "Company:"
+                      "value" = "$($Company)"
+                    },
     
-                        @{
-                            "name"  = "Action:"
-                            "value" = "$($action)"
-                            }
-                      )
+                @{
+                    "name"  = "Action:"
+                    "value" = "$($action)"
+                    }
+              )
+              
+    
     
                       "markdown" = $true
                   }
         )
+    
+        "potentialAction"= @(
+            
+            
+            @{
+                "@type"= "OpenUri"
+                "name"= "Open Datto RMM"
+                "targets"= @(
+                    @{
+                        "os"= "default"
+                        "uri"= "https=//zinfandel.rmm.datto.com/"
+                    }
+                )
+            }
+        )
       }
+          
       
       $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
       
@@ -1147,21 +1156,13 @@ $JSONBody = [PSCustomObject][Ordered]@{
     "sections"   = @(
           @{
          
+            "activityTitle"= "$($teamsMessageFile)"
+			"activitySubtitle"= "$env:computername"
+			"activityImage"= "https://yanceyworks.com/DattoRMMLogos/Error.png"
                   
             "facts"            = @(
 
-            @{
-                "name"  = ""
-                "value" = "<strong style='color:#ff9900;'>$($env:COMPUTERNAME)</strong>"
-            },
-            @{
-                "name"  = ""
-                "value" = "<strong style='color:#D2395A;'>$($teamsMessageFile)</strong>"
-              },
-              @{
-                "name"  = ""
-                "value" = "<strong style='color:#3192E3;'>$($ScriptName)</strong>"
-              },
+           
             @{
                   "name"  = "Company:"
                   "value" = "$($Company)"
@@ -1178,6 +1179,21 @@ $JSONBody = [PSCustomObject][Ordered]@{
                   "markdown" = $true
               }
     )
+
+    "potentialAction"= @(
+		
+		
+		@{
+			"@type"= "OpenUri"
+			"name"= "Open Datto RMM"
+			"targets"= @(
+				@{
+					"os"= "default"
+					"uri"= "https=//zinfandel.rmm.datto.com/"
+				}
+			)
+		}
+	)
   }
       
       $TeamMessageBody = ConvertTo-Json $JSONBody -Depth 100
