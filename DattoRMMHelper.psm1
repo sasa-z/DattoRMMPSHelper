@@ -1380,7 +1380,15 @@ function check-softwarePresence{
 
                 if($softwareCheck){
 
-                    $softwareVersion = $softwareCheck.Version
+                    if ($softwareCheck.count -gt 1){
+                        
+                        $softwareVersion = ($softwareCheck[0]).Version
+
+                    }else{
+
+                        $softwareVersion = $softwareCheck.Version
+                    }
+
                     
                 }else{
                    #check via registry
@@ -1498,7 +1506,7 @@ function download-file {
        .PARAMETER scriptName
             It is a script name that is used to create uniqueToastNotification
        .EXAMPLE
-            download-file -filURL $filURL -filName $filName
+            download-file -url $fileURL -fileName $fileName
         .OUTPUTS
        .NOTES
            FunctionName : 
