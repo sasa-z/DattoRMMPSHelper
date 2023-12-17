@@ -1373,7 +1373,7 @@ function check-softwarePresence{
 
         try{
             #via package
-            if ($ExactNametMatch.IsPresent){$softwareName = $SoftwareName}else{$softwareName = "*$SoftwareName*"}  
+            if ($ExactNametMatch.IsPresent){$softwareName = $SoftwareName}else{$softwareName = "$SoftwareName*"}  
                
                 $softwareCheck = Get-Package
                 $softwareCheck = $softwareCheck | Where-Object { $_.Name -like "$SoftwareName" }
