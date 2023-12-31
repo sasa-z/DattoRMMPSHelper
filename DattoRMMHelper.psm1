@@ -1418,6 +1418,7 @@ function check-softwarePresence{
 
 
 $finalResult =  [PSCustomObject]@{
+        Name = $softwareCheck.name
         Installed = if ($softwareCheck){$true}else{$False}
         Version =  $softwareVersion
         InstalledviaChoco = $InstalledViaChoco
