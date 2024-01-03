@@ -534,7 +534,7 @@ try{
 
     if ($EnvDattoVariablesValuesHashTable){
         foreach ($dattoVar in $EnvDattoVariablesValuesHashTable.GetEnumerator()){
-            send-log  -logText "$($dattoVar.Value) : $($dattoVar.name)" -skipWriteHost
+            send-log  -logText "$($dattoVar.Value) : $($dattoVar.name)"
         }
     }
     send-log  -logText "----------------------------------------------------------------------" 
@@ -1523,6 +1523,7 @@ function download-file {
         
     )
 
+    
     $downloadDestination =  "$env:rootScriptFolder\$scriptname"
 
             $ProgressPreference = 'SilentlyContinue'
