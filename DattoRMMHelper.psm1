@@ -1528,7 +1528,7 @@ function download-file {
 
             $ProgressPreference = 'SilentlyContinue'
             send-Log -logText "File download started and will be stored in $downloadDestination." -addDashes Below
-            Invoke-WebRequest -Uri $url -OutFile $downloadDestination\$fileName -ErrorAction Stop | out-null 
+            Invoke-WebRequest -Uri $url -OutFile "$downloadDestination\$fileName" -ErrorAction Stop | out-null 
             Unblock-File $downloadDestination\$fileName
             if(test-path $downloadDestination\$fileName){
                 send-log -logText "Download completed succesfully." -addDashes Below
