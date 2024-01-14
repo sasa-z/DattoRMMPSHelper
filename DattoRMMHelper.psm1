@@ -78,7 +78,7 @@ function send-Log {
     Write-Verbose "Parameters are:"
     Write-Verbose "logText is : $logText " 
     Write-Verbose "type is : $type " 
-     Write-Verbose "addDashes is :  $addDashes "
+    Write-Verbose "addDashes is :  $addDashes "
     Write-Verbose "addTeamsMessage is:  $addTeamsMessage "
     Write-Verbose "scriptname is : $scriptname " 
     Write-Verbose "rootScriptFolder is $rootScriptFolder"
@@ -1544,3 +1544,10 @@ function download-file {
 
 }
 
+function test {
+
+    write-host $error[0].Exception.Message
+  }
+  
+  
+  
