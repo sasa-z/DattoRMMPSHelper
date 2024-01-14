@@ -96,7 +96,8 @@ function send-Log {
     
         if ($catch.IsPresent){
             $LastError = $error[0].Exception.Message
-            $logText = "$logtext. Error: $($LastError), at line $($_.InvocationInfo.ScriptLineNumber)"
+            $line = $error[0].InvocationInfo.ScriptLineNumber
+            $logText = "$logtext. Error: $($LastError), at line $($line)"
         }
 
     if ($addDashes -eq "Above"){
