@@ -43,6 +43,7 @@ function send-Log {
         [switch]$addTeamsMessage,
         [switch]$skipWriteHost,
         [switch]$catch,
+        [string]$catchMessage,
         [string]$scriptname = $scriptname,
         [string]$rootScriptFolder = $rootScriptFolder
 
@@ -94,10 +95,9 @@ function send-Log {
  
     $DateStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
-        if ($catch.IsPresent){
-            $LastError = $error[0].Exception.Message
-            $line = $error[0].InvocationInfo.ScriptLineNumber
-            $logText = "$logtext. Error: $($LastError), at line $($line)"
+        if ($catchMessage){
+           
+            $logText = "$logtext. Error: $($catchMessage)"
         }
 
     if ($addDashes -eq "Above"){
@@ -1543,11 +1543,3 @@ function download-file {
 
 
 }
-
-function test {
-
-    write-host $error[0].Exception.Message
-  }
-  
-  
-  
