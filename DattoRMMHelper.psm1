@@ -95,7 +95,8 @@ function send-Log {
     $DateStamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
     
         if ($catch.IsPresent){
-            $logText = "$logtext. Error: $($error[0].exception.message), at line $($_.InvocationInfo.ScriptLineNumber)"
+            $LastError = $error[0].Exception.Message
+            $logText = "$logtext. Error: $($LastError), at line $($_.InvocationInfo.ScriptLineNumber)"
         }
 
     if ($addDashes -eq "Above"){
